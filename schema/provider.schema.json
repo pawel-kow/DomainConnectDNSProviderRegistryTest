@@ -1,0 +1,175 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Domain-Connect/DnsProviders/schema/provider.schema.json",
+  "title": "DNS provider registry entry",
+  "description": "Facts about a Domain Connect DNS provider the Scanner cannot measure. One file per providerId at providers/<a>/<b>/<providerId>.json. Every boolean is tri-state: true, false, absent or null = unknown. Consumers ignore unknown keys.",
+  "type": "object",
+  "required": ["providerId", "name"],
+  "properties": {
+    "providerId": {
+      "description": "The providerId of the DNS provider's settings response; determines the path.",
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[^/\\\\]+$"
+    },
+    "name": { "description": "Display name.", "type": "string", "minLength": 1 },
+    "url": { "description": "Website.", "$ref": "#/$defs/url" },
+    "logo": {
+      "description": "Logo file name, in the entry's folder.",
+      "type": "string",
+      "pattern": "^[^/\\\\]+\\.(svg|png|jpg)$"
+    },
+    "documentation": {
+      "description": "Public Domain Connect documentation.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["title", "url"],
+        "properties": {
+          "title": { "type": "string", "minLength": 1 },
+          "url": { "$ref": "#/$defs/url" }
+        }
+      }
+    },
+    "contacts": {
+      "type": "object",
+      "properties": {
+        "technical": { "description": "Technical contact.", "$ref": "#/$defs/contacts" }
+      }
+    },
+    "onboarding": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "description": "automatic: templates merged into the Templates repository are deployed without a request.",
+          "enum": ["automatic", "on-request"]
+        },
+        "documentationUrl": { "description": "Process documentation.", "$ref": "#/$defs/url" },
+        "formUrl": { "description": "Online request form.", "$ref": "#/$defs/url" },
+        "contacts": {
+          "description": "Where service providers request onboarding.",
+          "$ref": "#/$defs/contacts"
+        },
+        "partner": {
+          "description": "Third-party onboarding partner.",
+          "type": "object",
+          "required": ["name"],
+          "properties": {
+            "name": { "type": "string", "minLength": 1 },
+            "url": { "$ref": "#/$defs/url" }
+          }
+        },
+        "usesPartner": {
+          "description": "Onboarding runs through a third party.",
+          "$ref": "#/$defs/flag"
+        },
+        "cost": { "description": "Onboarding is charged.", "$ref": "#/$defs/flag" },
+        "requirements": {
+          "type": "object",
+          "properties": {
+            "signedTemplatesOnly": {
+              "description": "Only templates with signing.",
+              "$ref": "#/$defs/flag"
+            },
+            "warnPhishingRejected": {
+              "description": "Templates with warnPhishing are not accepted.",
+              "$ref": "#/$defs/flag"
+            },
+            "signingKeyPublished": {
+              "description": "The signing key has to be published.",
+              "$ref": "#/$defs/flag"
+            }
+          }
+        },
+        "notes": {
+          "description": "Further requirements or restrictions, verbatim.",
+          "type": "string"
+        }
+      }
+    },
+    "features": {
+      "type": "object",
+      "properties": {
+        "syncFlow": { "description": "Synchronous flow.", "$ref": "#/$defs/flag" },
+        "syncRedirectUri": {
+          "description": "redirect_uri honoured in the synchronous flow.",
+          "$ref": "#/$defs/flag"
+        },
+        "asyncFlow": { "description": "Asynchronous flow (OAuth).", "$ref": "#/$defs/flag" },
+        "asyncRevert": {
+          "description": "Revert in the asynchronous flow.",
+          "$ref": "#/$defs/flag"
+        },
+        "templateStateTracking": {
+          "description": "Applied templates are tracked.",
+          "$ref": "#/$defs/flag"
+        },
+        "templates": {
+          "type": "object",
+          "properties": {
+            "txtConflictMatching": {
+              "description": "txtConflictMatchingMode / txtConflictMatchingPrefix.",
+              "$ref": "#/$defs/flag"
+            },
+            "variablesInNumberFields": {
+              "description": "Variables in TTL, priority, weight, port.",
+              "$ref": "#/$defs/flag"
+            },
+            "multiInstance": { "description": "multiInstance.", "$ref": "#/$defs/flag" },
+            "sharedNames": {
+              "description": "sharedProviderName / sharedServiceName.",
+              "$ref": "#/$defs/flag"
+            },
+            "essential": { "description": "Record attribute essential.", "$ref": "#/$defs/flag" }
+          }
+        },
+        "recordTypes": {
+          "type": "object",
+          "properties": {
+            "spfm": { "description": "SPFM.", "$ref": "#/$defs/flag" },
+            "custom": { "description": "Custom RR types.", "$ref": "#/$defs/flag" },
+            "apexCname": { "description": "APEXCNAME.", "$ref": "#/$defs/flag" },
+            "redir301": { "description": "REDIR301.", "$ref": "#/$defs/flag" },
+            "redir302": { "description": "REDIR302.", "$ref": "#/$defs/flag" }
+          }
+        },
+        "nonStandard": {
+          "type": "object",
+          "properties": {
+            "cnameFlattening": {
+              "description": "CNAME flattening: templates with a CNAME on the apex.",
+              "$ref": "#/$defs/flag"
+            }
+          }
+        }
+      }
+    },
+    "notes": { "description": "Anything else, verbatim.", "type": "string" }
+  },
+  "$defs": {
+    "flag": { "description": "Tri-state: null = unknown.", "type": ["boolean", "null"] },
+    "url": { "type": "string", "pattern": "^https?://[^\\s]+$" },
+    "contacts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["type", "value"],
+        "properties": {
+          "type": { "enum": ["email", "url", "other"] },
+          "value": { "type": "string", "minLength": 1 },
+          "label": { "type": "string" }
+        },
+        "allOf": [
+          {
+            "if": { "properties": { "type": { "const": "email" } } },
+            "then": { "properties": { "value": { "pattern": "^[^@\\s]+@[^@\\s]+$" } } }
+          },
+          {
+            "if": { "properties": { "type": { "const": "url" } } },
+            "then": { "properties": { "value": { "$ref": "#/$defs/url" } } }
+          }
+        ]
+      }
+    }
+  }
+}

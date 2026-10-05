@@ -1,0 +1,10 @@
+{
+  "providerId": "ionos.com",
+  "name": "IONOS",
+  "url": "https://www.ionos.example",
+  "logo": "ionos.com.svg",
+  "onboarding": {
+    "mode": "on-request",
+    "contacts": [{ "type": "email", "value": "domain_connect_admin@ionos.example" }]
+  }
+}

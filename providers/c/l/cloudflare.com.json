@@ -1,0 +1,61 @@
+{
+  "providerId": "cloudflare.com",
+  "name": "Cloudflare",
+  "url": "https://www.cloudflare.example",
+  "logo": "cloudflare.com.svg",
+  "documentation": [
+    {
+      "title": "Domain Connect",
+      "url": "https://developers.cloudflare.example/dns/domain-connect/"
+    }
+  ],
+  "contacts": {
+    "technical": [{ "type": "email", "value": "dc-tech@cloudflare.example" }]
+  },
+  "onboarding": {
+    "mode": "on-request",
+    "documentationUrl": "https://developers.cloudflare.example/dns/domain-connect/onboarding/",
+    "formUrl": "https://forms.cloudflare.example/domain-connect",
+    "contacts": [
+      { "type": "email", "value": "domain-connect@cloudflare.example" },
+      {
+        "type": "url",
+        "value": "https://community.cloudflare.example/c/dns",
+        "label": "Community forum"
+      }
+    ],
+    "usesPartner": false,
+    "cost": false,
+    "requirements": {
+      "signedTemplatesOnly": true,
+      "warnPhishingRejected": false,
+      "signingKeyPublished": true
+    },
+    "notes": "Templates must <b>not</b> overwrite NS records."
+  },
+  "features": {
+    "syncFlow": true,
+    "syncRedirectUri": true,
+    "asyncFlow": false,
+    "asyncRevert": null,
+    "templateStateTracking": false,
+    "templates": {
+      "txtConflictMatching": true,
+      "variablesInNumberFields": false,
+      "multiInstance": true,
+      "sharedNames": true,
+      "essential": null
+    },
+    "recordTypes": {
+      "spfm": true,
+      "custom": false,
+      "apexCname": false,
+      "redir301": false,
+      "redir302": false
+    },
+    "nonStandard": { "cnameFlattening": true },
+    "futureFeature": true
+  },
+  "notes": "Example entry. Notes are shown verbatim, including <script>alert(1)</script>.",
+  "unknownTopLevelKey": { "ignored": true }
+}

@@ -1,0 +1,14 @@
+{
+  "providerId": "plesk.com",
+  "name": "Plesk",
+  "url": "https://www.plesk.example",
+  "onboarding": {
+    "mode": "automatic",
+    "notes": "Templates merged into the Templates repository ship with the next Plesk release."
+  },
+  "features": {
+    "syncFlow": true,
+    "asyncFlow": true,
+    "asyncRevert": true
+  }
+}
