@@ -104,6 +104,8 @@ Minimal entry:
 }
 ```
 
+Full entry: [providers/p/r/provider.example.json](providers/p/r/provider.example.json) is a dummy entry (`providerId` `provider.example`) that uses every field, with its logo [provider.example.svg](providers/p/r/provider.example.svg). Its values are invented and its `.example` URLs do not resolve.
+
 ## Example domain
 
 `exampleDomain` lets anyone reproduce the whole discovery flow: the TXT record `_domainconnect.{exampleDomain}` names the provider's API, and `GET https://{that API}/v2/{exampleDomain}/settings` returns this `providerId`. A domain whose `_domainconnect` record is missing or points elsewhere is not an example domain, even if the settings endpoint answers for it. The domain must also belong to the provider itself (its own site, a brand or company of the same group) or be listed publicly by the provider as an example. A customer's domain is never used.
@@ -119,3 +121,12 @@ A pull request adds or changes an entry. An entry must:
 - name a logo file that exists in the same folder, if `logo` is set.
 
 It should also list the sources of its facts in `links` with `rel: "source"` and an `accessed` date, and must not name a customer's domain (see [Example domain](#example-domain)).
+
+CI ([.github/workflows/ci.yml](.github/workflows/ci.yml)) checks every pull request:
+
+- added and changed entries validate against the schema (all entries when the schema changes),
+- every file under `providers/` is a regular file (no symlink) and either an entry at the path derived from its `providerId` or a logo that an entry in the same folder names; the allowed logo extensions are taken from the schema's `logo` pattern,
+- a logo named by an entry exists,
+- nothing outside `providers/` is added, changed or deleted.
+
+The checks always run from the base branch (`pull_request_target`), so a pull request cannot change them; its files are only read. Run the placement checks locally with `scripts/check-files.sh` (needs `bash`, `git` and `jq`).

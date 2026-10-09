@@ -1,0 +1,108 @@
+name: CI
+
+# Pull requests are checked with pull_request_target, so the workflow, the script,
+# the schema and the pinned packages always come from the base branch: a pull request,
+# also one from a fork, cannot change the checks that run on it.
+#
+# The files to check are checked out separately to data/ and are only read as data.
+# Never execute anything from data/ in this workflow: no scripts, package manifests,
+# local actions or build tools. Output that contains text from data/ is wrapped in
+# stop-commands, so it cannot inject workflow commands.
+on:
+  pull_request_target:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the trusted code
+        uses: actions/checkout@v7
+        with:
+          path: trusted
+          persist-credentials: false
+
+      - name: Check out the files to check
+        uses: actions/checkout@v7
+        with:
+          path: data
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+          # Safe because data/ is only read, see the top of this file.
+          allow-unsafe-pr-checkout: true
+
+      - name: Install check-jsonschema
+        run: |
+          python3 -m venv "$RUNNER_TEMP/venv"
+          "$RUNNER_TEMP/venv/bin/pip" install --quiet --require-hashes -r trusted/.github/requirements-ci.txt
+
+      - name: List added, changed and deleted files
+        id: changed
+        working-directory: data
+        env:
+          EVENT: ${{ github.event_name }}
+          PR_BASE: ${{ github.event.pull_request.base.sha }}
+          PUSH_BEFORE: ${{ github.event.before }}
+        run: |
+          case "$EVENT" in
+            pull_request_target) base="$PR_BASE" ;;
+            push) base="$PUSH_BEFORE" ;;
+            *) base= ;;
+          esac
+          # A new branch or a manual run has no base: check everything.
+          if [ -z "$base" ] || ! git cat-file -e "$base^{commit}" 2>/dev/null; then
+            echo "full=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git diff -z --name-only --no-renames "$base"...HEAD > "$RUNNER_TEMP/changed"
+          echo "full=false" >> "$GITHUB_OUTPUT"
+          echo "file=$RUNNER_TEMP/changed" >> "$GITHUB_OUTPUT"
+          token=$(openssl rand -hex 16)
+          echo "::stop-commands::$token"
+          tr '\0' '\n' < "$RUNNER_TEMP/changed"
+          echo "::$token::"
+
+      - name: Check file placement
+        working-directory: data
+        env:
+          CHANGED: ${{ steps.changed.outputs.file }}
+        run: bash ../trusted/scripts/check-files.sh -s ../trusted/schema/provider.schema.json ${CHANGED:+"$CHANGED"}
+
+      - name: Check the schema against its metaschema
+        run: '"$RUNNER_TEMP/venv/bin/check-jsonschema" --check-metaschema trusted/schema/provider.schema.json'
+
+      - name: Validate entries against the schema
+        working-directory: data
+        env:
+          FULL: ${{ steps.changed.outputs.full }}
+          CHANGED: ${{ steps.changed.outputs.file }}
+        run: |
+          # All entries on a full run or when the schema changed; otherwise only the changed ones.
+          if [ "$FULL" = true ] || tr '\0' '\n' < "$CHANGED" | grep -qx 'schema/provider.schema.json'; then
+            git ls-files -z 'providers/*.json'
+          else
+            cat "$CHANGED"
+          fi \
+            | while IFS= read -r -d '' f; do
+                [[ $f == providers/*.json ]] || continue
+                # Deleted entries and anything that is not a regular file (symlinks) are left out;
+                # the placement check reports those.
+                if [ -f "$f" ] && [ ! -L "$f" ]; then printf '%s\0' "$f"; fi
+              done > "$RUNNER_TEMP/entries"
+          if [ ! -s "$RUNNER_TEMP/entries" ]; then
+            echo "No entries to validate."
+            exit 0
+          fi
+          token=$(openssl rand -hex 16)
+          echo "::stop-commands::$token"
+          status=0
+          xargs -0 "$RUNNER_TEMP/venv/bin/check-jsonschema" \
+            --schemafile "$GITHUB_WORKSPACE/trusted/schema/provider.schema.json" < "$RUNNER_TEMP/entries" || status=$?
+          echo "::$token::"
+          exit "$status"

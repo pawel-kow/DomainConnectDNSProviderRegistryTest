@@ -1,0 +1,106 @@
+{
+  "providerId": "provider.example",
+  "name": "Example DNS Provider",
+  "url": "https://www.provider.example",
+  "exampleDomain": "provider.example",
+  "logo": "provider.example.svg",
+  "documentation": [
+    {
+      "title": "Domain Connect",
+      "url": "https://docs.provider.example/domain-connect"
+    },
+    {
+      "title": "Domain Connect onboarding for service providers",
+      "url": "https://docs.provider.example/domain-connect/onboarding"
+    }
+  ],
+  "contacts": {
+    "technical": [
+      { "type": "email", "value": "dns-engineering@provider.example", "label": "DNS engineering" },
+      { "type": "url", "value": "https://support.provider.example/contact", "label": "Support form" }
+    ]
+  },
+  "onboarding": {
+    "mode": "on-request",
+    "documentationUrl": "https://docs.provider.example/domain-connect/onboarding",
+    "formUrl": "https://partners.provider.example/domain-connect/request",
+    "contacts": [
+      { "type": "email", "value": "domainconnect@provider.example" },
+      { "type": "other", "value": "Partner account manager", "label": "Existing partners" }
+    ],
+    "partner": {
+      "name": "Example Onboarding Partner",
+      "url": "https://www.partner.example"
+    },
+    "usesPartner": true,
+    "cost": false,
+    "requirements": {
+      "signedTemplatesOnly": true,
+      "warnPhishingRejected": true,
+      "signingKeyPublished": true
+    },
+    "notes": "The template must be merged into the Templates repository before it is requested. Requests go through the onboarding partner; expect deployment within five working days."
+  },
+  "features": {
+    "syncFlow": true,
+    "syncRedirectUri": true,
+    "asyncFlow": true,
+    "asyncRevert": false,
+    "templateStateTracking": true,
+    "settings": {
+      "urlControlPanel": true,
+      "nameServers": true,
+      "windowSize": true,
+      "nonStandard": [
+        { "key": "redirectSupported", "description": "Boolean; true when REDIR301/REDIR302 records can be applied for the domain." }
+      ]
+    },
+    "templates": {
+      "txtConflictMatching": true,
+      "variablesInNumberFields": true,
+      "multiInstance": true,
+      "sharedNames": false,
+      "essential": null
+    },
+    "recordTypes": {
+      "spfm": true,
+      "custom": false,
+      "apexCname": false,
+      "redir301": true,
+      "redir302": true
+    },
+    "nonStandard": { "cnameFlattening": false }
+  },
+  "notes": "Dummy entry that shows every field of the format; provider.example is not a real DNS provider and all values are invented. The .example domains are reserved by RFC 2606, so none of the links resolve and the exampleDomain discovery check does not apply to this entry. essential is null to show an unknown value.",
+  "links": [
+    {
+      "url": "https://docs.provider.example/domain-connect",
+      "title": "Example DNS Provider Docs: Domain Connect (flows, template features, record types)",
+      "rel": "source",
+      "accessed": "2026-10-09"
+    },
+    {
+      "url": "https://docs.provider.example/domain-connect/onboarding",
+      "title": "Example DNS Provider Docs: onboarding (contacts, partner, requirements)",
+      "rel": "source",
+      "accessed": "2026-10-09"
+    },
+    {
+      "url": "https://api.provider.example/v2/provider.example/settings",
+      "title": "Settings response for the provider's own domain (providerId, settings keys)",
+      "rel": "source",
+      "accessed": "2026-10-09"
+    },
+    {
+      "url": "https://api.provider.example/v2/{domain}/settings",
+      "title": "Settings response for a customer domain, replaced by the {domain} placeholder",
+      "rel": "source",
+      "accessed": "2026-10-09"
+    },
+    {
+      "url": "https://status.provider.example",
+      "title": "Service status",
+      "rel": "status"
+    }
+  ]
+}
