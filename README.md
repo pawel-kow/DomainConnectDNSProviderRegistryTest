@@ -10,6 +10,7 @@ The registry format is a proposal (proposed repository name: `Domain-Connect/Dns
 providers/<a>/<b>/<providerId>.json        one entry per providerId
 providers/<a>/<b>/<providerId>.<svg|png|jpg>   its logo, next to the entry
 schema/provider.schema.json                JSON Schema (draft 2020-12) of an entry
+form/index.html                            web form that opens a pull request with an entry
 ```
 
 `<a>` and `<b>` are the first and second character of `providerId`, lowercased. Any character other than `a-z` or `0-9` becomes `_`, and a one-character id has `<b>` = `_`. The file name is `providerId` as is.
@@ -114,7 +115,7 @@ A settings URL in `links` may name a domain of the provider even when that domai
 
 ## Contributing
 
-A pull request adds or changes an entry. An entry must:
+A pull request adds or changes an entry. The [form](form/index.html), published with GitHub Pages, builds an entry from the schema, validates it and opens the pull request on GitHub with the file filled in; it can also load an existing entry to change it. An entry must:
 
 - validate against [schema/provider.schema.json](schema/provider.schema.json),
 - sit at the path derived from its `providerId`,
@@ -130,3 +131,5 @@ CI ([.github/workflows/ci.yml](.github/workflows/ci.yml)) checks every pull requ
 - nothing outside `providers/` is added, changed or deleted.
 
 The checks always run from the base branch (`pull_request_target`), so a pull request cannot change them; its files are only read. Run the placement checks locally with `scripts/check-files.sh` (needs `bash`, `git` and `jq`).
+
+The form is served by GitHub Pages from the root of `main` (Settings, Pages, Deploy from a branch, `main`, `/ (root)`); `.nojekyll` makes Pages serve the `_` folders under `providers/`. The form reads the schema from the same site, so a schema change needs no change to the form. Preview it locally with `python3 -m http.server` in the repository root and open `http://localhost:8000/form/`.
