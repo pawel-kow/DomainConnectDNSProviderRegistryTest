@@ -1,0 +1,50 @@
+{
+  "providerId": "domainchief",
+  "name": "Domain Chief",
+  "url": "https://domain.chief.app",
+  "logo": "domainchief.png",
+  "documentation": [
+    {
+      "title": "Domain Connect",
+      "url": "https://docs.chief.tools/developers/domainchief/guides/domain-connect"
+    }
+  ],
+  "onboarding": {
+    "mode": "automatic",
+    "documentationUrl": "https://docs.chief.tools/developers/domainchief/guides/domain-connect",
+    "contacts": [
+      {
+        "type": "email",
+        "value": "domainconnect@chief.app",
+        "label": "Testing a template before it is published, or a published template not recognised"
+      }
+    ],
+    "notes": "Compatible templates are imported from the Templates repository each day; no request is needed. The importer validates each template and skips templates that use records or options Domain Chief does not support. The domain domainchief.app (on Domain Chief DNS) can be used to test an integration."
+  },
+  "features": {
+    "syncFlow": true,
+    "asyncFlow": false,
+    "settings": { "urlControlPanel": true, "nameServers": true, "windowSize": true, "nonStandard": [] }
+  },
+  "notes": "A template applies only to domains active in Domain Chief and on Domain Chief hosted DNS, for a signed-in user with access to the domain. host must be supplied when the template sets hostRequired.",
+  "links": [
+    {
+      "url": "https://www.domainconnect.org/dns-providers/",
+      "title": "Domain Connect: DNS Providers (documentation link, logo)",
+      "rel": "source",
+      "accessed": "2026-10-09"
+    },
+    {
+      "url": "https://docs.chief.tools/developers/domainchief/guides/domain-connect",
+      "title": "Domain Chief developer docs: Domain Connect (target of aka.chief.app/domainconnect)",
+      "rel": "source",
+      "accessed": "2026-10-09"
+    },
+    {
+      "url": "https://domain.chief.app/api/domainconnect/v2/chief.app/settings",
+      "title": "Settings response for a Domain Chief-hosted domain (providerId)",
+      "rel": "source",
+      "accessed": "2026-10-09"
+    }
+  ]
+}

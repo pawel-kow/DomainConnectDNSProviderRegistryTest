@@ -1,0 +1,36 @@
+{
+  "providerId": "wordpress.com",
+  "name": "WordPress.com",
+  "url": "https://wordpress.com",
+  "logo": "wordpress.com.png",
+  "onboarding": {
+    "mode": "on-request",
+    "contacts": [{ "type": "email", "value": "registrar@automattic.com" }]
+  },
+  "features": {
+    "syncFlow": true,
+    "asyncFlow": false,
+    "settings": { "urlControlPanel": false, "nameServers": false, "windowSize": true, "nonStandard": [] }
+  },
+  "notes": "Domains on WordPress.com name servers carry the TXT record _domainconnect = public-api.wordpress.com/rest/v1.3/domain-connect by default; the domain owner can delete it. The settings response points urlAsyncUX at an \"unsupported\" endpoint.",
+  "links": [
+    {
+      "url": "https://www.domainconnect.org/dns-providers/",
+      "title": "Domain Connect: DNS Providers (onboarding contact, logo)",
+      "rel": "source",
+      "accessed": "2026-10-09"
+    },
+    {
+      "url": "https://wordpress.com/support/domains/custom-dns/view-or-restore-default-dns-records/",
+      "title": "WordPress.com Support: Restore default DNS records (_domainconnect discovery record)",
+      "rel": "source",
+      "accessed": "2026-10-09"
+    },
+    {
+      "url": "https://public-api.wordpress.com/rest/v1.3/domain-connect/v2/jetpack.com/settings",
+      "title": "Settings response for a WordPress.com-hosted domain (providerId, async flow unsupported)",
+      "rel": "source",
+      "accessed": "2026-10-09"
+    }
+  ]
+}

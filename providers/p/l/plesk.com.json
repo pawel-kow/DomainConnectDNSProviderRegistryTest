@@ -1,14 +1,70 @@
 {
   "providerId": "plesk.com",
   "name": "Plesk",
-  "url": "https://www.plesk.example",
+  "url": "https://www.plesk.com",
+  "logo": "plesk.com.png",
+  "documentation": [
+    {
+      "title": "Domain Connect extension",
+      "url": "https://www.plesk.com/extensions/domain-connect/"
+    },
+    {
+      "title": "Configuring DNS via Domain Connect (customer guide)",
+      "url": "https://docs.plesk.com/en-US/onyx/customer-guide/79634"
+    }
+  ],
   "onboarding": {
-    "mode": "automatic",
-    "notes": "Templates merged into the Templates repository ship with the next Plesk release."
+    "mode": "on-request",
+    "contacts": [{ "type": "email", "value": "domainconnect@plesk.com" }],
+    "requirements": {
+      "signedTemplatesOnly": false
+    },
+    "notes": "The extension ships a bundled set of templates, built from Plesk's fork of the Templates repository (plesk/domain-connect-templates); new templates reach servers with an extension release."
   },
   "features": {
     "syncFlow": true,
-    "asyncFlow": true,
-    "asyncRevert": true
-  }
+    "syncRedirectUri": true,
+    "asyncFlow": false,
+    "settings": { "urlControlPanel": false, "nameServers": true, "windowSize": true, "nonStandard": [] },
+    "recordTypes": {
+      "spfm": true,
+      "custom": false,
+      "apexCname": false,
+      "redir301": false,
+      "redir302": false
+    }
+  },
+  "notes": "Stack entry: every Plesk server with the Domain Connect extension in DNS provider mode answers with providerId \"plesk.com\" and providerName \"Plesk\" by default (both are configurable). Supported record types: A, AAAA, CNAME, NS, MX, TXT, SRV, SPFM. The signature is checked only when the template sets syncPubKeyDomain; redirect_uri is honoured when the request is signed or its host equals syncRedirectDomain. The extension can also act as a service provider for Plesk-hosted sites.",
+  "links": [
+    {
+      "url": "https://www.domainconnect.org/dns-providers/",
+      "title": "Domain Connect: DNS Providers (onboarding contact, logo)",
+      "rel": "source",
+      "accessed": "2026-10-09"
+    },
+    {
+      "url": "https://github.com/plesk/ext-domain-connect",
+      "title": "Source code of the Plesk Domain Connect extension (providerId default, settings response, flows, record types, signature and redirect handling)",
+      "rel": "source",
+      "accessed": "2026-10-09"
+    },
+    {
+      "url": "https://github.com/plesk/ext-domain-connect/blob/master/CHANGES.md",
+      "title": "Extension changelog (SPFM support, nameServers in settings)",
+      "rel": "source",
+      "accessed": "2026-10-09"
+    },
+    {
+      "url": "https://github.com/plesk/domain-connect-templates",
+      "title": "Plesk fork of the Templates repository",
+      "rel": "source",
+      "accessed": "2026-10-09"
+    },
+    {
+      "url": "https://www.plesk.com/extensions/domain-connect/",
+      "title": "Plesk Extensions: Domain Connect",
+      "rel": "source",
+      "accessed": "2026-10-09"
+    }
+  ]
 }

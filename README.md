@@ -1,16 +1,14 @@
-# Domain Connect DNS Provider Registry (test)
+# Domain Connect DNS Provider Registry
 
-A test version of the Domain Connect DNS provider registry: a set of JSON files, one per DNS provider, holding facts about Domain Connect support that cannot be measured by scanning DNS providers: logo, website, documentation, contacts, onboarding process and supported features.
+The Domain Connect DNS provider registry: a set of JSON files, one per DNS provider, holding facts about Domain Connect support that cannot be measured by scanning DNS providers: logo, website, documentation, contacts, onboarding process and supported features.
 
-The registry format is a proposal. The real registry repository does not exist yet (proposed name: `Domain-Connect/DnsProviders`).
-
-> **All data here is fictional.** URLs and contacts use `.example` domains, and the logos are placeholder SVGs, not real brand logos. The entries are a development data set and test fixture for registry consumers, not information about the real companies.
+The registry format is a proposal (proposed repository name: `Domain-Connect/DnsProviders`). This first version has one entry for every DNS provider listed on [domainconnect.org/dns-providers](https://www.domainconnect.org/dns-providers/), with the logo published there. Each entry was completed from the provider's public documentation and its live Domain Connect settings response, and lists every source it used in `links`.
 
 ## Layout
 
 ```
 providers/<a>/<b>/<providerId>.json        one entry per providerId
-providers/<a>/<b>/<providerId>.<svg|png>   its logo, next to the entry
+providers/<a>/<b>/<providerId>.<svg|png|jpg>   its logo, next to the entry
 schema/provider.schema.json                JSON Schema (draft 2020-12) of an entry
 ```
 
@@ -19,6 +17,7 @@ schema/provider.schema.json                JSON Schema (draft 2020-12) of an ent
 | `providerId` | Entry path |
 | --- | --- |
 | `cloudflare.com` | `providers/c/l/cloudflare.com.json` |
+| `domainchief` | `providers/d/o/domainchief.json` |
 | `1and1` | `providers/1/a/1and1.json` |
 | `x` | `providers/x/_/x.json` |
 
@@ -69,37 +68,40 @@ The full definition is [schema/provider.schema.json](schema/provider.schema.json
 | `features.recordTypes.apexCname` | boolean | `APEXCNAME`. |
 | `features.recordTypes.redir301` | boolean | `REDIR301`. |
 | `features.recordTypes.redir302` | boolean | `REDIR302`. |
+| `features.settings.urlControlPanel` | boolean | The settings response contains `urlControlPanel`. |
+| `features.settings.nameServers` | boolean | The settings response contains `nameServers`. |
+| `features.settings.windowSize` | boolean | The settings response contains `width` and `height`. |
+| `features.settings.nonStandard` | `[{key, description?}]` | Properties in the settings response that the specification does not define; empty list = none, absent = unknown. |
 | `features.nonStandard.cnameFlattening` | boolean | CNAME flattening: templates with a CNAME on the apex. |
 | `notes` | string | Anything else. |
+| `links` | `[link]` | Generic list of related links; `rel: "source"` marks the sources the entry was built from. |
 
 `contact` is `{"type": "email" | "url" | "other", "value": string, "label"?: string}`.
+
+`link` is `{"url": URL, "title"?: string, "rel"?: string, "accessed"?: "YYYY-MM-DD"}`. `rel` is a lowercase token; `source` is the only value defined so far, and consumers ignore values they do not know. `accessed` is the date the link was last checked.
 
 Minimal entry:
 
 ```json
 {
-  "providerId": "ionos.com",
-  "name": "IONOS",
-  "url": "https://www.ionos.example",
-  "logo": "ionos.com.svg",
+  "providerId": "namesilo.com",
+  "name": "NameSilo",
+  "url": "https://www.namesilo.com",
+  "logo": "namesilo.com.png",
   "onboarding": {
     "mode": "on-request",
-    "contacts": [{ "type": "email", "value": "domain_connect_admin@ionos.example" }]
-  }
+    "contacts": [{ "type": "email", "value": "domainconnect@namesilo.com" }]
+  },
+  "links": [
+    {
+      "url": "https://www.domainconnect.org/dns-providers/",
+      "title": "Domain Connect: DNS Providers",
+      "rel": "source",
+      "accessed": "2026-10-09"
+    }
+  ]
 }
 ```
-
-## Test entries
-
-Each entry covers a case a registry consumer has to handle:
-
-| Entry | Case covered |
-| --- | --- |
-| [cloudflare.com](providers/c/l/cloudflare.com.json) | Every field, with `true`, `false` and unknown values; HTML in notes (must be shown as text); unknown keys to ignore. |
-| [ionos.com](providers/i/o/ionos.com.json) | Typical migrated entry: name, url, logo, on-request onboarding, one contact. |
-| [plesk.com](providers/p/l/plesk.com.json) | Stack entry shared by several deployments; automatic onboarding; no logo. |
-
-Cases with no entry (a `providerId` without a file, or a DNS provider with no `providerId`) are covered by the absence of a file.
 
 ## Contributing
 
@@ -109,11 +111,4 @@ A pull request adds or changes an entry. An entry must:
 - sit at the path derived from its `providerId`,
 - name a logo file that exists in the same folder, if `logo` is set.
 
-The proposal has CI check these three points; this test repository has no CI yet.
-
-## Open questions
-
-- Repository owner and name.
-- Logos: SVG preferred; licence or permission to republish.
-- Who maintains entries and who reviews pull requests.
-- Entries for single deployments of a multi-deployment stack (for example a hosting company on Plesk).
+It should also list the sources of its facts in `links` with `rel: "source"` and an `accessed` date.

@@ -1,0 +1,56 @@
+{
+  "providerId": "vercel.com",
+  "name": "Vercel",
+  "url": "https://vercel.com",
+  "logo": "vercel.com.jpg",
+  "documentation": [
+    {
+      "title": "Domain Connect",
+      "url": "https://vercel.com/docs/domains/domain-connect"
+    }
+  ],
+  "onboarding": {
+    "mode": "on-request",
+    "documentationUrl": "https://vercel.com/docs/domains/domain-connect#onboard-your-template-with-vercel",
+    "contacts": [{ "type": "email", "value": "domainconnect@vercel.com" }],
+    "requirements": {
+      "signedTemplatesOnly": true,
+      "signingKeyPublished": true
+    },
+    "notes": "Send the link to the template(s) and a short in-product video of the flow that uses Domain Connect. The template must also be published to the Templates repository and must set syncPubKeyDomain."
+  },
+  "features": {
+    "syncFlow": true,
+    "syncRedirectUri": true,
+    "asyncFlow": false,
+    "settings": { "urlControlPanel": false, "nameServers": false, "windowSize": false, "nonStandard": [] },
+    "recordTypes": {
+      "spfm": true,
+      "apexCname": false,
+      "redir301": false,
+      "redir302": false
+    },
+    "nonStandard": { "cnameFlattening": true }
+  },
+  "notes": "Every synchronous apply request must be signed (RSA-SHA256). redirect_uri is required, must be HTTPS and must match syncRedirectDomain. Supported record types: A, AAAA, CNAME, MX, TXT, CAA, SPFM, SRV, NS; a CNAME on the apex is created as an ALIAS record. Template support can be checked at https://vercel.com/api/domain-connect/v2/domainTemplates/providers/{providerId}/services/{serviceId}.",
+  "links": [
+    {
+      "url": "https://www.domainconnect.org/dns-providers/",
+      "title": "Domain Connect: DNS Providers (onboarding contact, documentation link, logo)",
+      "rel": "source",
+      "accessed": "2026-10-09"
+    },
+    {
+      "url": "https://vercel.com/docs/domains/domain-connect",
+      "title": "Vercel Docs: Domain Connect",
+      "rel": "source",
+      "accessed": "2026-10-09"
+    },
+    {
+      "url": "https://domainconnect.vercel.com/v2/nextjs.org/settings",
+      "title": "Settings response for a Vercel-hosted domain (providerId, no urlAsyncUX)",
+      "rel": "source",
+      "accessed": "2026-10-09"
+    }
+  ]
+}

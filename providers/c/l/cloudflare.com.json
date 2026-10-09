@@ -1,61 +1,63 @@
 {
   "providerId": "cloudflare.com",
   "name": "Cloudflare",
-  "url": "https://www.cloudflare.example",
-  "logo": "cloudflare.com.svg",
+  "url": "https://www.cloudflare.com",
+  "logo": "cloudflare.com.png",
   "documentation": [
     {
       "title": "Domain Connect",
-      "url": "https://developers.cloudflare.example/dns/domain-connect/"
+      "url": "https://developers.cloudflare.com/dns/reference/domain-connect/"
     }
   ],
-  "contacts": {
-    "technical": [{ "type": "email", "value": "dc-tech@cloudflare.example" }]
-  },
   "onboarding": {
     "mode": "on-request",
-    "documentationUrl": "https://developers.cloudflare.example/dns/domain-connect/onboarding/",
-    "formUrl": "https://forms.cloudflare.example/domain-connect",
-    "contacts": [
-      { "type": "email", "value": "domain-connect@cloudflare.example" },
-      {
-        "type": "url",
-        "value": "https://community.cloudflare.example/c/dns",
-        "label": "Community forum"
-      }
-    ],
-    "usesPartner": false,
-    "cost": false,
+    "documentationUrl": "https://developers.cloudflare.com/dns/reference/domain-connect/",
+    "contacts": [{ "type": "email", "value": "domain-connect@cloudflare.com" }],
     "requirements": {
       "signedTemplatesOnly": true,
       "warnPhishingRejected": false,
       "signingKeyPublished": true
     },
-    "notes": "Templates must <b>not</b> overwrite NS records."
+    "notes": "The template must first be merged into the Templates repository, then requested by email with: the template links, the FQDNs of the syncPubKeyDomain TXT records, a logo (SVG preferred), the default proxy status for A, AAAA and CNAME records, and optionally a Cloudflare account ID to test the template before it is published. syncBlock, if present, must be false. Templates with APEXCNAME fail onboarding. Lint with dc-template-linter -cloudflare. Template updates are picked up automatically (expected within eight hours); opting out is possible."
   },
   "features": {
     "syncFlow": true,
     "syncRedirectUri": true,
     "asyncFlow": false,
-    "asyncRevert": null,
-    "templateStateTracking": false,
+    "settings": { "urlControlPanel": false, "nameServers": false, "windowSize": false, "nonStandard": [] },
     "templates": {
-      "txtConflictMatching": true,
-      "variablesInNumberFields": false,
-      "multiInstance": true,
-      "sharedNames": true,
-      "essential": null
+      "txtConflictMatching": false,
+      "multiInstance": false,
+      "sharedNames": false,
+      "essential": false
     },
     "recordTypes": {
       "spfm": true,
-      "custom": false,
       "apexCname": false,
-      "redir301": false,
-      "redir302": false
+      "redir301": true,
+      "redir302": true
     },
-    "nonStandard": { "cnameFlattening": true },
-    "futureFeature": true
+    "nonStandard": { "cnameFlattening": true }
   },
-  "notes": "Example entry. Notes are shown verbatim, including <script>alert(1)</script>.",
-  "unknownTopLevelKey": { "ignored": true }
+  "notes": "The signature (sig) is required and must be the last query parameter. state and serviceName in the apply URL are ignored. Ignored template properties: syncBlock, shared, sharedServiceName, syncRedirectDomain, multiInstance, warnPhishing, hostRequired; ignored record properties: essential, txtConflictMatchingMode, txtConflictMatchingPrefix (a template TXT record only conflicts with an identical TXT record, so SPF must use SPFM). REDIR301/REDIR302 become zone bulk redirect rules and replace existing bulk redirects. A CNAME on the apex is flattened.",
+  "links": [
+    {
+      "url": "https://www.domainconnect.org/dns-providers/",
+      "title": "Domain Connect: DNS Providers (onboarding contact, documentation link, logo)",
+      "rel": "source",
+      "accessed": "2026-10-09"
+    },
+    {
+      "url": "https://developers.cloudflare.com/dns/reference/domain-connect/",
+      "title": "Cloudflare Docs: Domain Connect",
+      "rel": "source",
+      "accessed": "2026-10-09"
+    },
+    {
+      "url": "https://api.cloudflare.com/client/v4/dns/domainconnect/v2/cloudflare.com/settings",
+      "title": "Settings response for a Cloudflare-hosted domain (providerId)",
+      "rel": "source",
+      "accessed": "2026-10-09"
+    }
+  ]
 }

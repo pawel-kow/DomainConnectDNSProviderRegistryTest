@@ -1,0 +1,30 @@
+{
+  "providerId": "namesilo.com",
+  "name": "NameSilo",
+  "url": "https://www.namesilo.com",
+  "logo": "namesilo.com.png",
+  "onboarding": {
+    "mode": "on-request",
+    "contacts": [{ "type": "email", "value": "domainconnect@namesilo.com" }]
+  },
+  "features": {
+    "syncFlow": true,
+    "asyncFlow": false,
+    "settings": { "urlControlPanel": true, "nameServers": false, "windowSize": true, "nonStandard": [] }
+  },
+  "notes": "NameSilo DNS uses the dnsowl.com name servers. The settings response has providerDisplayName \"NameSilo Domains\" and no urlAsyncUX.",
+  "links": [
+    {
+      "url": "https://www.domainconnect.org/dns-providers/",
+      "title": "Domain Connect: DNS Providers (onboarding contact, logo)",
+      "rel": "source",
+      "accessed": "2026-10-09"
+    },
+    {
+      "url": "https://www.namesilo.com/domainconnect/v2/namesilo.org/settings",
+      "title": "Settings response for a NameSilo-hosted domain (providerId, no urlAsyncUX)",
+      "rel": "source",
+      "accessed": "2026-10-09"
+    }
+  ]
+}

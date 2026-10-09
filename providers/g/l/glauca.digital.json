@@ -1,0 +1,44 @@
+{
+  "providerId": "glauca.digital",
+  "name": "Glauca Digital",
+  "url": "https://glauca.digital",
+  "logo": "glauca.digital.png",
+  "documentation": [
+    {
+      "title": "HexDNS: Domain Connect",
+      "url": "https://docs.glauca.digital/hexdns/domain-connect/"
+    }
+  ],
+  "onboarding": {
+    "mode": "automatic",
+    "documentationUrl": "https://docs.glauca.digital/hexdns/domain-connect/",
+    "contacts": [{ "type": "email", "value": "hello@glauca.digital" }],
+    "notes": "Templates merged into the Templates repository are synced within 48 hours; no request is needed. Later updates are synced the same way."
+  },
+  "features": {
+    "syncFlow": true,
+    "asyncFlow": false,
+    "settings": { "urlControlPanel": true, "nameServers": true, "windowSize": false, "nonStandard": [] }
+  },
+  "notes": "Domain Connect is part of the HexDNS DNS hosting product. Glauca is the trading name of AS207960 Cyfyngedig (the providerName in the settings response). Only the synchronous flow is supported; service providers that need the asynchronous flow are asked to get in touch.",
+  "links": [
+    {
+      "url": "https://www.domainconnect.org/dns-providers/",
+      "title": "Domain Connect: DNS Providers (contact, logo)",
+      "rel": "source",
+      "accessed": "2026-10-09"
+    },
+    {
+      "url": "https://docs.glauca.digital/hexdns/domain-connect/",
+      "title": "Glauca docs: HexDNS Domain Connect",
+      "rel": "source",
+      "accessed": "2026-10-09"
+    },
+    {
+      "url": "https://dns.glauca.digital/connect/v2/glauca.digital/settings",
+      "title": "Settings response for a Glauca-hosted domain (providerId, no urlAsyncUX)",
+      "rel": "source",
+      "accessed": "2026-10-09"
+    }
+  ]
+}

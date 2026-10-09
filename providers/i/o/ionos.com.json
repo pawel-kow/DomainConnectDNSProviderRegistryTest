@@ -1,10 +1,40 @@
 {
   "providerId": "ionos.com",
   "name": "IONOS",
-  "url": "https://www.ionos.example",
-  "logo": "ionos.com.svg",
+  "url": "https://www.ionos.com",
+  "logo": "ionos.com.png",
   "onboarding": {
     "mode": "on-request",
-    "contacts": [{ "type": "email", "value": "domain_connect_admin@ionos.example" }]
-  }
+    "contacts": [{ "type": "email", "value": "domain_connect_admin@domain.ionos.com" }]
+  },
+  "features": {
+    "syncFlow": true,
+    "asyncFlow": true,
+    "settings": {
+      "urlControlPanel": true,
+      "nameServers": false,
+      "windowSize": true,
+      "nonStandard": [
+        {
+          "key": "market",
+          "description": "IONOS market of the domain, for example \"de\"; urlSyncUX and urlAsyncUX point to that market's host."
+        }
+      ]
+    }
+  },
+  "notes": "Every domain registered at IONOS gets the CNAME record _domainconnect -> _domainconnect.ionos.com by default (domains registered before January 2022 may point to _domainconnect.1and1.com, with the same function). The settings response returns width and height as strings (for example \"800\"), where the specification defines numbers.",
+  "links": [
+    {
+      "url": "https://www.domainconnect.org/dns-providers/",
+      "title": "Domain Connect: DNS Providers (onboarding contact, logo)",
+      "rel": "source",
+      "accessed": "2026-10-09"
+    },
+    {
+      "url": "https://www.ionos.com/help/domains/glossary-important-terms-and-topics-explained/domainconnect/",
+      "title": "IONOS Help: _domainconnect",
+      "rel": "source",
+      "accessed": "2026-10-09"
+    }
+  ]
 }
