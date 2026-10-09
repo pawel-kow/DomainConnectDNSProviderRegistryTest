@@ -3,220 +3,183 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Registry Entry Form</title>
+<title>Registry Entry Form – Domain Connect</title>
 <!-- GitHub repository and branch that pull requests go to. On <owner>.github.io/<repo>/ the
      repository is taken from the address instead. -->
 <meta name="registry-repository" content="pawel-kow/DomainConnectDNSProviderRegistryTest">
 <meta name="registry-branch" content="main">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/spectre.css@0.5.9/dist/spectre.min.css" integrity="sha384-0pZXcd7Aq/G9HTCOUwvvpy9s5QCu8jkdmAcsCLFchXEH95ixikypH8uUia/pJw/h" crossorigin="anonymous">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/spectre.css@0.5.9/dist/spectre-icons.min.css" integrity="sha384-QIsYxKx0APUcKpd5YYQ0cFLByNGWmX/J0Tqkg3REyK2lrY2qSsH8Y1j4pN5/bscy" crossorigin="anonymous">
-<script src="https://cdn.jsdelivr.net/npm/@json-editor/json-editor@2.17.1/dist/jsoneditor.js" integrity="sha384-tAxHFk7aZf9tgWtSw0Vkto1KTpSl+Lwv+Y4dolRs09NdVJwiiVV25EmrhYWt+mYb" crossorigin="anonymous"></script>
+<link rel="icon" href="assets/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16x16.png">
+<link rel="stylesheet" href="styles.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ajv/8.17.1/ajv2020.bundle.min.js" integrity="sha384-kz0rEmUPEGITP2jtssINcPlpx2oqv5B7mCxBMc6J15TQxYhoz2QdB0I974nvL4nI" crossorigin="anonymous"></script>
+<!-- Form library: react-jsonschema-form (https://rjsf-team.github.io/react-jsonschema-form/),
+     core theme. -->
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@19.3.0",
+    "react/": "https://esm.sh/react@19.3.0/",
+    "react-dom": "https://esm.sh/react-dom@19.3.0?external=react",
+    "react-dom/": "https://esm.sh/react-dom@19.3.0&external=react/",
+    "@rjsf/core": "https://esm.sh/@rjsf/core@6.10.1?external=react,react-dom&deps=@rjsf/utils@6.10.1",
+    "@rjsf/validator-ajv8": "https://esm.sh/@rjsf/validator-ajv8@6.10.1?external=react,react-dom&deps=@rjsf/utils@6.10.1"
+  }
+}
+</script>
 <style>
-  body { max-width: 960px; margin: 0 auto; padding: 16px; }
-  pre { white-space: pre-wrap; word-break: break-word; }
-  #result { border-top: 1px solid #dadee4; padding: 12px 0; }
-  #errors li { color: #e85600; }
+  /* The core theme writes Bootstrap 3 markup; these rules give it the page's design. */
+  .rjsf legend { font-size: 1.125rem; font-weight: 700; color: var(--secondary-navy); padding: 0; margin-top: var(--spacing-sm); }
+  .rjsf fieldset fieldset { border-left: 3px solid var(--light-blue-gray); padding-left: var(--spacing-sm); margin-top: var(--spacing-sm); }
+  .rjsf .form-group { margin-bottom: var(--spacing-sm); }
+  .rjsf .control-label { display: block; margin-bottom: 2px; }
+  .rjsf .required { color: var(--error-text); margin-left: 2px; }
+  .rjsf .field-description { color: var(--text-secondary); font-size: 0.8125rem; margin: 2px 0 6px; }
+  .rjsf .has-error input, .rjsf .has-error select { border-color: var(--accent-coral); }
+  .rjsf .error-detail { list-style: none; padding: 0; margin: 4px 0 0; color: var(--error-text); font-size: 0.8125rem; }
+  .rjsf .rjsf-array-item { gap: var(--spacing-xs); padding: var(--spacing-xs) 0; border-bottom: 1px solid var(--border-color); }
+  .rjsf .rjsf-array-item > .col-xs-9 { flex: 1 1 auto; min-width: 0; }
+  .rjsf .rjsf-array-item > div > .rjsf-field > fieldset { border-left: 0; padding-left: 0; margin-top: 0; }
+  .rjsf .rjsf-array-item > div > .rjsf-field > fieldset > legend { display: none; }
+  .rjsf .array-item-toolbox .btn-group { gap: 4px; }
+  .rjsf .rjsf-array-item-add { text-align: right; margin: var(--spacing-xs) 0 0; }
+  .rjsf .btn { font: inherit; font-size: 0.875rem; cursor: pointer; color: var(--primary-navy); background: var(--bg-white);
+    border: 1px solid var(--light-blue-gray); border-radius: var(--radius-sm); padding: 0.25rem 0.6rem; }
+  .rjsf .btn:hover:not(:disabled) { background: var(--bg-tint); border-color: var(--medium-teal); }
+  .rjsf .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .rjsf .btn-danger { color: var(--error-text); }
+  .rjsf .glyphicon { font-style: normal; }
+  .glyphicon-plus::before { content: "+ add"; }
+  .glyphicon-remove::before { content: "\2715"; }
+  .glyphicon-arrow-up::before { content: "\2191"; }
+  .glyphicon-arrow-down::before { content: "\2193"; }
+  .glyphicon-copy::before { content: "\29C9"; }
 </style>
 </head>
 <body>
-<h1>Domain Connect DNS provider registry</h1>
-<p>
-  This form builds an entry for the registry and opens a pull request on GitHub with it.
-  The fields come from the <a id="schema-link" href="../schema/provider.schema.json">schema</a>.
-  Before you submit, read the rules in the <a id="readme-link" href="../README.md">README</a>:
-  list a source for every fact in <code>links</code> (<code>rel</code> <code>source</code> with an
-  <code>accessed</code> date), and never name a customer's domain.
-  Optional fields are added with their checkbox; leave out what you do not know.
-</p>
+<header class="site">
+  <div class="container">
+    <div class="header-content">
+      <a href="https://www.domainconnect.org/"><img src="assets/DomainConnectBlackSmall.png" alt="Domain Connect" class="logo"></a>
+      <h1>DNS Provider Registry</h1>
+    </div>
+    <p class="subtitle">Add or change a registry entry</p>
+  </div>
+</header>
 
-<div class="input-group" style="max-width: 480px">
-  <input id="load-id" class="form-input" placeholder="providerId of an existing entry">
-  <button id="load" class="btn input-group-btn">Load entry</button>
-</div>
-<p id="load-status" class="text-gray"></p>
+<main class="container layout">
+  <div>
+    <section class="card">
+      <h2>About this form</h2>
+      <p>
+        This form builds an entry for the registry and opens a pull request on GitHub with it.
+        The fields come from the <a href="../schema/provider.schema.json">schema</a>. Before you
+        submit, read the rules in the <a data-repo="/blob/{branch}/README.md" href="../README.md">README</a>:
+        list a source for every fact in <code>links</code> (<code>rel</code> <code>source</code>
+        with an <code>accessed</code> date), and never name a customer's domain. Leave out what
+        you do not know.
+      </p>
+      <form id="load-form" class="load controls">
+        <input id="load-id" placeholder="providerId of an existing entry" aria-label="providerId of an existing entry">
+        <button type="submit" class="btn">Load entry</button>
+      </form>
+      <p id="load-status" class="muted" aria-live="polite"></p>
+    </section>
 
-<div id="editor"><p>Loading the schema…</p></div>
+    <section class="card">
+      <h2>Entry</h2>
+      <div id="form"><p class="muted">Loading the schema…</p></div>
+    </section>
+  </div>
 
-<div id="result">
-  <p>File: <code id="path">-</code> <span id="exists"></span></p>
-  <ul id="errors"></ul>
-  <button id="open-pr" class="btn btn-primary" disabled>Open pull request on GitHub</button>
-  <button id="copy" class="btn">Copy JSON</button>
-  <details>
-    <summary>JSON</summary>
-    <pre id="json"></pre>
-  </details>
-  <p class="text-gray">
-    A logo cannot be passed through the link. Set <code>logo</code> to its file name, and after
-    the pull request is open, upload the file to the same folder on the pull request's branch
-    (Add file, then Upload files).
-  </p>
-</div>
+  <aside class="panel">
+    <section class="card">
+      <h2>Pull request</h2>
+      <dl>
+        <dt>File</dt>
+        <dd><code id="path">–</code> <span id="exists" class="status"></span></dd>
+      </dl>
+      <p id="valid" hidden>The entry is valid.</p>
+      <ul id="errors" aria-live="polite"></ul>
+      <div class="actions">
+        <button id="submit" class="btn primary" disabled>Open pull request on GitHub</button>
+        <button id="copy" class="btn">Copy JSON</button>
+      </div>
+      <p id="message" class="message" aria-live="polite"></p>
+      <p class="muted">
+        A logo cannot be passed through the link. Set <code>logo</code> to its file name, and
+        after the pull request is open, upload the file to the same folder on the pull
+        request's branch (Add file, then Upload files).
+      </p>
+      <details id="json-details">
+        <summary>JSON</summary>
+        <pre id="json"></pre>
+      </details>
+    </section>
+  </aside>
+</main>
 
-<script>
-"use strict";
+<footer class="site">
+  <div class="container">
+    <p>&copy; Domain Connect. Visit <a href="https://www.domainconnect.org/">domainconnect.org</a></p>
+    <p><a data-repo="" href="https://github.com/">View on GitHub</a></p>
+  </div>
+</footer>
 
-const meta = name => document.querySelector(`meta[name="${name}"]`).content;
-const ghPages = location.hostname.match(/^([^.]+)\.github\.io$/);
-const REPO = ghPages && location.pathname.split("/")[1]
-  ? `${ghPages[1]}/${location.pathname.split("/")[1]}`
-  : meta("registry-repository");
-const BRANCH = meta("registry-branch");
-// GitHub rejects longer addresses; above this the JSON is copied instead of passed in the link.
-const MAX_URL = 8000;
+<script type="module">
+import { createElement as h, useEffect, useState } from "react";
+import { createRoot } from "react-dom/client";
+import Form, { getDefaultRegistry } from "@rjsf/core";
+import { customizeValidator } from "@rjsf/validator-ajv8";
+import { start, fail } from "./registry.js";
 
-document.getElementById("readme-link").href = `https://github.com/${REPO}/blob/${BRANCH}/README.md`;
+// A tri-state flag (type boolean or null) is a choice of true and false; the empty choice,
+// "unknown", leaves the key out. RJSF leaves label and description of a boolean to its widget.
+const isFlag = s => Array.isArray(s.type) && s.type.includes("boolean") && s.type.includes("null");
+const { CheckboxWidget, SelectWidget } = getDefaultRegistry().widgets;
+const widgets = {
+  CheckboxWidget: p => isFlag(p.schema)
+    ? h("div", null,
+        h("label", { className: "control-label", htmlFor: p.id }, p.label),
+        p.schema.description && h("p", { className: "field-description" }, p.schema.description),
+        h(SelectWidget, {
+          ...p,
+          value: p.value ?? undefined,
+          placeholder: "unknown",
+          options: { ...p.options, enumOptions: [{ label: "true", value: true }, { label: "false", value: false }] },
+        }))
+    : h(CheckboxWidget, p),
+};
 
-// Path rule from the README: providers/<a>/<b>/<providerId>.json.
-function entryPath(id) {
-  const c = ch => /^[a-z0-9]$/.test(ch.toLowerCase()) ? ch.toLowerCase() : "_";
-  return `providers/${c(id[0])}/${id.length > 1 ? c(id[1]) : "_"}/${id}.json`;
-}
+const validator = customizeValidator({ AjvClass: ajv2020.default });
 
-// The form library shows descriptions as HTML.
-const escapeHtml = s => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-
-// The form library does not resolve $defs, so local $refs are inlined; keywords next to a
-// $ref (such as description) are kept. A type that allows null (tri-state booleans) becomes a
-// choice of its values, so null survives loading and saving an entry.
-function prepare(node, root) {
-  if (Array.isArray(node)) return node.map(n => prepare(n, root));
-  if (!node || typeof node !== "object") return node;
-  let out = {};
-  if (typeof node.$ref === "string" && node.$ref.startsWith("#/")) {
-    const target = node.$ref.slice(2).split("/")
-      .map(p => p.replace(/~1/g, "/").replace(/~0/g, "~"))
-      .reduce((o, k) => o[k], root);
-    out = prepare(target, root);
-  }
-  for (const [k, v] of Object.entries(node)) {
-    if (k === "$ref" || k === "$defs" || k === "$schema" || k === "$id") continue;
-    out[k] = k === "properties"
-      ? Object.fromEntries(Object.entries(v).map(([p, s]) => [p, prepare(s, root)]))
-      : k === "description" ? escapeHtml(v) : prepare(v, root);
-  }
-  if (Array.isArray(out.type) && out.type.length === 2 && out.type.includes("null")
-      && out.type.includes("boolean")) {
-    delete out.type;
-    out.enum = [null, true, false];
-    out.options = { enum_titles: ["unknown", "true", "false"], ...out.options };
-  }
-  return out;
-}
-
-let editor, validate, existing = new Set();
-
-async function exists(path) {
-  if (existing.has(path)) return true;
-  try {
-    const r = await fetch(`../${path}`, { method: "HEAD", cache: "no-store" });
-    if (r.ok) existing.add(path);
-    return r.ok;
-  } catch { return false; }
-}
-
-function json() { return JSON.stringify(editor.getValue(), null, 2) + "\n"; }
-
-let checkSeq = 0;
-async function update() {
-  const value = editor.getValue();
-  document.getElementById("json").textContent = json();
-  const ok = validate(value);
-  document.getElementById("errors").replaceChildren(...(validate.errors || []).map(e => {
-    const li = document.createElement("li");
-    li.textContent = `${e.instancePath || "entry"}: ${e.message}`;
-    return li;
-  }));
-  const id = typeof value.providerId === "string" ? value.providerId : "";
-  const path = id ? entryPath(id) : "";
-  document.getElementById("path").textContent = path || "-";
-  const button = document.getElementById("open-pr");
-  button.disabled = !ok || !path;
-  const seq = ++checkSeq;
-  const isNew = !path || !(await exists(path));
-  if (seq !== checkSeq) return;
-  document.getElementById("exists").textContent = path
-    ? (isNew ? "(new entry)" : "(changes an existing entry)") : "";
-  button.textContent = isNew ? "Open pull request on GitHub" : "Copy JSON and edit the entry on GitHub";
-  button.dataset.mode = isNew ? "new" : "edit";
-}
-
-async function copy() {
-  await navigator.clipboard.writeText(json());
-}
-
-async function openPr() {
-  const path = entryPath(editor.getValue().providerId);
-  let url;
-  if (this.dataset.mode === "edit") {
-    // GitHub's file editor cannot be prefilled; the user pastes the copied JSON.
-    await copy();
-    alert("The JSON is copied. Replace the file's content with it in the GitHub editor.");
-    url = `https://github.com/${REPO}/edit/${BRANCH}/${path}`;
-  } else {
-    url = `https://github.com/${REPO}/new/${BRANCH}?` +
-      new URLSearchParams({ filename: path, value: json() });
-    if (url.length > MAX_URL) {
-      await copy();
-      alert("The entry is too long for a link. The JSON is copied; paste it into the GitHub editor.");
-      url = `https://github.com/${REPO}/new/${BRANCH}?` + new URLSearchParams({ filename: path });
+function mount(el, schema, onChange) {
+  el.classList.add("controls");
+  return new Promise(resolve => {
+    function Entry() {
+      const [data, setData] = useState({});
+      useEffect(() => { resolve({ setValue: setData }); }, []);
+      useEffect(() => { onChange(data); }, [data]);
+      return h(Form, {
+        schema,
+        validator,
+        widgets,
+        formData: data,
+        liveValidate: true,
+        showErrorList: false,
+        experimental_defaultFormStateBehavior: {
+          emptyObjectFields: "skipEmptyDefaults",
+          arrayMinItems: { populate: "never" },
+        },
+        uiSchema: { "ui:submitButtonOptions": { norender: true } },
+        onChange: e => setData(e.formData),
+      });
     }
-  }
-  window.open(url, "_blank", "noopener");
-}
-
-async function load() {
-  const id = document.getElementById("load-id").value.trim();
-  const status = document.getElementById("load-status");
-  if (!id) return;
-  const r = await fetch(`../${entryPath(id)}`, { cache: "no-store" }).catch(() => null);
-  if (!r || !r.ok) { status.textContent = `No entry ${entryPath(id)} found.`; return; }
-  editor.setValue(await r.json());
-  status.textContent = `Loaded ${entryPath(id)}.`;
-}
-
-async function main() {
-  const schema = await (await fetch("../schema/provider.schema.json", { cache: "no-store" })).json();
-  validate = new ajv2020.default({ allErrors: true, strict: false }).compile(schema);
-  // An enum without a type would get a type switcher. Show it as a plain choice that keeps
-  // the enum's values as they are (the select editor turns them into strings).
-  JSONEditor.defaults.editors.enumChoice = class extends JSONEditor.defaults.editors.select {
-    typecast(v) {
-      const i = this.schema.enum.findIndex(e => String(e) === String(v));
-      return i === -1 ? v : this.schema.enum[i];
-    }
-  };
-  JSONEditor.defaults.resolvers.unshift(s => s.enum && !s.type ? "enumChoice" : undefined);
-  // Text is kept verbatim: the library strips anything that looks like HTML from strings, but
-  // it only writes them to input values, never as HTML.
-  JSONEditor.defaults.editors.string.prototype.purify = v => v;
-  const el = document.getElementById("editor");
-  el.replaceChildren();
-  editor = new JSONEditor(el, {
-    schema: prepare(schema, schema),
-    theme: "spectre",
-    iconlib: "spectre",
-    show_opt_in: true,
-    show_errors: "interaction",
-    disable_edit_json: true,
-    disable_properties: true,
-    prompt_before_delete: false,
+    createRoot(el).render(h(Entry));
   });
-  editor.on("change", update);
-  document.getElementById("open-pr").addEventListener("click", openPr);
-  document.getElementById("copy").addEventListener("click", copy);
-  document.getElementById("load").addEventListener("click", load);
-  const params = new URLSearchParams(location.search);
-  if (params.get("providerId")) {
-    document.getElementById("load-id").value = params.get("providerId");
-    editor.on("ready", load);
-  }
 }
 
-main().catch(e => {
-  document.getElementById("editor").textContent = `The form could not be built: ${e}`;
-});
+start(mount).catch(fail);
 </script>
 </body>
 </html>
