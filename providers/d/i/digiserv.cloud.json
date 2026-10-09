@@ -1,0 +1,24 @@
+{
+  "providerId": "digiserv.cloud",
+  "name": "Digiserv",
+  "url": "https://digiserv.cloud",
+  "exampleDomain": "digiserv.cloud",
+  "features": {
+    "syncFlow": true,
+    "asyncFlow": false,
+    "settings": {
+      "urlControlPanel": true,
+      "nameServers": false,
+      "windowSize": true,
+      "nonStandard": []
+    }
+  },
+  "links": [
+    {
+      "url": "https://digiserv.cloud/api/domainconnect/v2/digiserv.cloud/settings",
+      "title": "Settings response for digiserv.cloud (providerId, no urlAsyncUX)",
+      "rel": "source",
+      "accessed": "2026-10-09"
+    }
+  ]
+}

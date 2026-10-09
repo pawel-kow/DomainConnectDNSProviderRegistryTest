@@ -14,6 +14,11 @@
     },
     "name": { "description": "Display name.", "type": "string", "minLength": 1 },
     "url": { "description": "Website.", "$ref": "#/$defs/url" },
+    "exampleDomain": {
+      "description": "A domain that completes the whole discovery flow at this provider: its _domainconnect TXT record names the provider's API and the settings response there has this providerId. Only a domain of the provider itself or one the provider lists publicly; never a customer's domain.",
+      "type": "string",
+      "pattern": "^(?=.{1,253}$)([A-Za-z0-9]([A-Za-z0-9-]{0,61}[A-Za-z0-9])?\\.)+[A-Za-z0-9-]{2,63}$"
+    },
     "logo": {
       "description": "Logo file name, in the entry's folder.",
       "type": "string",
@@ -173,7 +178,7 @@
     },
     "notes": { "description": "Anything else, verbatim.", "type": "string" },
     "links": {
-      "description": "Generic list of links related to the entry. rel \"source\" marks a source the entry's data was taken from.",
+      "description": "Generic list of links related to the entry. rel \"source\" marks a source the entry's data was taken from. A settings URL queried with a domain that neither belongs to the provider nor is listed publicly by it has the domain replaced by the placeholder {domain}.",
       "type": "array",
       "items": {
         "type": "object",

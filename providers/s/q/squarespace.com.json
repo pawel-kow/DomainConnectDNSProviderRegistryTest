@@ -1,0 +1,30 @@
+{
+  "providerId": "squarespace.com",
+  "name": "Squarespace",
+  "url": "https://www.squarespace.com",
+  "features": {
+    "syncFlow": true,
+    "asyncFlow": false,
+    "settings": {
+      "urlControlPanel": false,
+      "nameServers": false,
+      "windowSize": false,
+      "nonStandard": []
+    }
+  },
+  "notes": "The settings endpoint answers only for domains hosted at Squarespace (\"Domain name does not exist\" otherwise). Squarespace groups the records a template adds into one block in its DNS settings, labelled \"Domain Connect to <service provider>\".",
+  "links": [
+    {
+      "url": "https://help.entri.com/articles/3708348786-squarespace-how-to-manage-individual-dns-records-added-by-entri",
+      "title": "Entri Help: Squarespace: How to Manage Individual DNS Records Added by Entri",
+      "rel": "source",
+      "accessed": "2026-10-09"
+    },
+    {
+      "url": "https://domains.squarespace.com/v2/{domain}/settings",
+      "title": "Settings response for a Squarespace-hosted domain (providerId, no urlAsyncUX)",
+      "rel": "source",
+      "accessed": "2026-10-09"
+    }
+  ]
+}

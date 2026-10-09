@@ -2,6 +2,7 @@
   "providerId": "domainchief",
   "name": "Domain Chief",
   "url": "https://domain.chief.app",
+  "exampleDomain": "chief.app",
   "logo": "domainchief.png",
   "documentation": [
     {

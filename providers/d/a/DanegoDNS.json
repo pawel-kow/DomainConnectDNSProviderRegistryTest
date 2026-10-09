@@ -1,0 +1,25 @@
+{
+  "providerId": "DanegoDNS",
+  "name": "Danego DNS",
+  "url": "https://danego.nl",
+  "exampleDomain": "danego.nl",
+  "features": {
+    "syncFlow": true,
+    "asyncFlow": false,
+    "settings": {
+      "urlControlPanel": true,
+      "nameServers": false,
+      "windowSize": true,
+      "nonStandard": []
+    }
+  },
+  "notes": "The settings response has providerDisplayName \"Danego DNS Manager\".",
+  "links": [
+    {
+      "url": "https://dns.danego.nl/domainconnect/v2/danego.nl/settings",
+      "title": "Settings response for danego.nl (providerId, no urlAsyncUX)",
+      "rel": "source",
+      "accessed": "2026-10-09"
+    }
+  ]
+}

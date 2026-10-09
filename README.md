@@ -39,6 +39,7 @@ The full definition is [schema/provider.schema.json](schema/provider.schema.json
 | `providerId` | string | Key; equals the settings `providerId`; determines the path. |
 | `name` | string | Display name. |
 | `url` | URL | Website. |
+| `exampleDomain` | domain name | A domain that completes discovery at this provider. See [Example domain](#example-domain). |
 | `logo` | string | Logo file name, in the entry's folder. |
 | `documentation` | `[{title, url}]` | Public Domain Connect documentation. |
 | `contacts.technical` | `[contact]` | Technical contact. |
@@ -103,6 +104,12 @@ Minimal entry:
 }
 ```
 
+## Example domain
+
+`exampleDomain` lets anyone reproduce the whole discovery flow: the TXT record `_domainconnect.{exampleDomain}` names the provider's API, and `GET https://{that API}/v2/{exampleDomain}/settings` returns this `providerId`. A domain whose `_domainconnect` record is missing or points elsewhere is not an example domain, even if the settings endpoint answers for it. The domain must also belong to the provider itself (its own site, a brand or company of the same group) or be listed publicly by the provider as an example. A customer's domain is never used.
+
+A settings URL in `links` may name a domain of the provider even when that domain is not `exampleDomain`. A settings URL queried with any other domain, such as a customer's, has that domain replaced by the placeholder `{domain}`, for example `https://domainconnect.api.godaddy.com/v2/{domain}/settings`.
+
 ## Contributing
 
 A pull request adds or changes an entry. An entry must:
@@ -111,4 +118,4 @@ A pull request adds or changes an entry. An entry must:
 - sit at the path derived from its `providerId`,
 - name a logo file that exists in the same folder, if `logo` is set.
 
-It should also list the sources of its facts in `links` with `rel: "source"` and an `accessed` date.
+It should also list the sources of its facts in `links` with `rel: "source"` and an `accessed` date, and must not name a customer's domain (see [Example domain](#example-domain)).

@@ -2,6 +2,7 @@
   "providerId": "cloudflare.com",
   "name": "Cloudflare",
   "url": "https://www.cloudflare.com",
+  "exampleDomain": "cloudflare.com",
   "logo": "cloudflare.com.png",
   "documentation": [
     {

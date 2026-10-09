@@ -1,0 +1,25 @@
+{
+  "providerId": "dnslinq.de",
+  "name": "DNSLINQ",
+  "url": "https://dnslinq.de",
+  "exampleDomain": "dnslinq.de",
+  "features": {
+    "syncFlow": true,
+    "asyncFlow": false,
+    "settings": {
+      "urlControlPanel": true,
+      "nameServers": true,
+      "windowSize": true,
+      "nonStandard": []
+    }
+  },
+  "notes": "dnslinq.de redirects to synlinq.de. _domainconnect.dnslinq.de points to domainconnect.dnslinq.de, while urlAPI in the settings response is api.dnslinq.de/domain-connect/.",
+  "links": [
+    {
+      "url": "https://domainconnect.dnslinq.de/v2/dnslinq.de/settings",
+      "title": "Settings response for dnslinq.de (providerId, no urlAsyncUX)",
+      "rel": "source",
+      "accessed": "2026-10-09"
+    }
+  ]
+}

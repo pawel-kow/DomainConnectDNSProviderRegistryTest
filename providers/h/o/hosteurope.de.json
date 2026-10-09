@@ -1,0 +1,33 @@
+{
+  "providerId": "hosteurope.de",
+  "name": "Host Europe",
+  "url": "https://www.hosteurope.de",
+  "features": {
+    "syncFlow": true,
+    "asyncFlow": false,
+    "settings": {
+      "urlControlPanel": true,
+      "nameServers": true,
+      "windowSize": true,
+      "nonStandard": [
+        {
+          "key": "domain",
+          "description": "The queried domain name."
+        },
+        {
+          "key": "redirectSupported",
+          "description": "Boolean, true."
+        }
+      ]
+    }
+  },
+  "notes": "The settings response has providerName \"hosteurope\" and no providerDisplayName. The synchronous flow runs in the KIS customer panel (kis.hosteurope.de).",
+  "links": [
+    {
+      "url": "https://domainconnect.hosteurope.de/v2/hosteurope.de/settings",
+      "title": "Settings response for a Host Europe-hosted domain (providerId, no urlAsyncUX)",
+      "rel": "source",
+      "accessed": "2026-10-09"
+    }
+  ]
+}

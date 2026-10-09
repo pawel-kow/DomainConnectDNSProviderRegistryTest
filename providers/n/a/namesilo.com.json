@@ -21,7 +21,7 @@
       "accessed": "2026-10-09"
     },
     {
-      "url": "https://www.namesilo.com/domainconnect/v2/namesilo.org/settings",
+      "url": "https://www.namesilo.com/domainconnect/v2/{domain}/settings",
       "title": "Settings response for a NameSilo-hosted domain (providerId, no urlAsyncUX)",
       "rel": "source",
       "accessed": "2026-10-09"

@@ -1,0 +1,24 @@
+{
+  "providerId": "customer.realtoxmedia.de",
+  "name": "Realtox Media",
+  "url": "https://realtoxmedia.de",
+  "features": {
+    "syncFlow": true,
+    "asyncFlow": false,
+    "settings": {
+      "urlControlPanel": true,
+      "nameServers": false,
+      "windowSize": false,
+      "nonStandard": []
+    }
+  },
+  "notes": "The settings response has providerName \"Realtox Media \" (trailing space) and no providerDisplayName. urlControlPanel contains the literal placeholder %domain%.",
+  "links": [
+    {
+      "url": "https://customer.realtoxmedia.de/de/domainconnect/v2/realtoxmedia.de/settings",
+      "title": "Settings response for realtoxmedia.de (providerId, no urlAsyncUX)",
+      "rel": "source",
+      "accessed": "2026-10-09"
+    }
+  ]
+}

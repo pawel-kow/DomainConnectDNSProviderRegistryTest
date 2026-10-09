@@ -2,6 +2,7 @@
   "providerId": "vercel.com",
   "name": "Vercel",
   "url": "https://vercel.com",
+  "exampleDomain": "nextjs.org",
   "logo": "vercel.com.jpg",
   "documentation": [
     {

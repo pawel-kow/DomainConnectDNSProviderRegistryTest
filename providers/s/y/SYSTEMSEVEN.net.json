@@ -1,0 +1,24 @@
+{
+  "providerId": "SYSTEMSEVEN.net",
+  "name": "SYSTEMSEVEN",
+  "url": "https://www.systemseven.net",
+  "features": {
+    "syncFlow": true,
+    "asyncFlow": false,
+    "settings": {
+      "urlControlPanel": false,
+      "nameServers": true,
+      "windowSize": true,
+      "nonStandard": []
+    }
+  },
+  "notes": "The providerId is mixed case. The settings response has no providerDisplayName.",
+  "links": [
+    {
+      "url": "https://webhosting.systemseven.net/modules/domain-connect/public/index.php/v2/systemseven.net/settings",
+      "title": "Settings response for systemseven.net (providerId, no urlAsyncUX)",
+      "rel": "source",
+      "accessed": "2026-10-09"
+    }
+  ]
+}

@@ -22,7 +22,7 @@
       "accessed": "2026-10-09"
     },
     {
-      "url": "https://domainconnect.api.godaddy.com/v2/domainconnect.org/settings",
+      "url": "https://domainconnect.api.godaddy.com/v2/{domain}/settings",
       "title": "Settings response for a GoDaddy-hosted domain (providerId, sync and async flow URLs)",
       "rel": "source",
       "accessed": "2026-10-09"
