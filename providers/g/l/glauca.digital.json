@@ -10,11 +10,13 @@
       "url": "https://docs.glauca.digital/hexdns/domain-connect/"
     }
   ],
+  "contacts": {
+    "technical": [{ "type": "email", "value": "hello@glauca.digital" }]
+  },
   "onboarding": {
     "mode": "automatic",
-    "documentationUrl": "https://docs.glauca.digital/hexdns/domain-connect/",
-    "contacts": [{ "type": "email", "value": "hello@glauca.digital" }],
-    "notes": "Templates merged into the Templates repository are synced within 48 hours; no request is needed. Later updates are synced the same way."
+    "updateSchedule": "Templates merged into the Templates repository are synced within 48 hours; later updates are synced the same way.",
+    "documentationUrl": "https://docs.glauca.digital/hexdns/domain-connect/"
   },
   "features": {
     "syncFlow": true,

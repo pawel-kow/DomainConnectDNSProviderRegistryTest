@@ -58,28 +58,63 @@
       "properties": {
         "mode": {
           "title": "Mode",
-          "description": "automatic: templates merged into the Templates repository are deployed without a request.",
-          "enum": ["automatic", "on-request"]
+          "description": "automatic: templates merged into the Templates repository are deployed without a request. on-request: service providers request onboarding through the onboarding contacts. other: described in the mode description.",
+          "enum": ["automatic", "on-request", "other"]
         },
-        "documentationUrl": {
-          "title": "Process documentation",
-          "description": "Process documentation.",
-          "$ref": "#/$defs/url"
-        },
-        "formUrl": {
-          "title": "Request form",
-          "description": "Online request form.",
-          "$ref": "#/$defs/url"
+        "updateSchedule": {
+          "title": "Update schedule",
+          "description": "When templates merged into the Templates repository are deployed, for example daily. Only with mode automatic.",
+          "type": "string",
+          "minLength": 1
         },
         "contacts": {
           "title": "Onboarding contacts",
-          "description": "Where service providers request onboarding.",
-          "$ref": "#/$defs/contacts"
+          "description": "Where service providers request onboarding. Required, with at least one contact, with mode on-request; not allowed otherwise.",
+          "$ref": "#/$defs/contacts",
+          "minItems": 1
+        },
+        "modeDescription": {
+          "title": "Description",
+          "description": "How onboarding works. Only with mode other.",
+          "type": "string",
+          "minLength": 1
+        },
+        "documentationUrl": {
+          "title": "Process documentation",
+          "description": "Documentation of the onboarding process.",
+          "$ref": "#/$defs/url"
         },
         "cost": {
           "title": "Charged",
           "description": "Onboarding is charged.",
           "$ref": "#/$defs/flag"
+        },
+        "costDetails": {
+          "title": "Details",
+          "description": "What is charged and how. Only when charged is true.",
+          "type": "string",
+          "minLength": 1
+        },
+        "agreementRequired": {
+          "title": "Contract, agreement or T&C acceptance required",
+          "description": "A contract or agreement has to be signed, or terms and conditions accepted, before onboarding.",
+          "$ref": "#/$defs/flag"
+        },
+        "agreementUrl": {
+          "title": "Agreement URL",
+          "description": "The agreement template, or the flow in which it is signed or accepted. Only when an agreement is required.",
+          "$ref": "#/$defs/url"
+        },
+        "usesPartner": {
+          "title": "Uses a partner",
+          "description": "Onboarding runs through a third party.",
+          "$ref": "#/$defs/flag"
+        },
+        "partners": {
+          "title": "Onboarding partners",
+          "description": "Third parties onboarding runs through. Only when uses a partner is true.",
+          "type": "array",
+          "items": { "$ref": "#/$defs/partner" }
         },
         "requirements": {
           "title": "Requirements",
@@ -106,25 +141,35 @@
           "title": "Notes",
           "description": "Further requirements or restrictions, verbatim.",
           "type": "string"
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "mode": { "const": "automatic" } }, "required": ["mode"] },
+          "else": { "properties": { "updateSchedule": false } }
         },
-        "usesPartner": {
-          "title": "Uses a partner",
-          "description": "Onboarding runs through a third party. Only when true can partners be listed.",
-          "$ref": "#/$defs/flag"
+        {
+          "if": { "properties": { "mode": { "const": "on-request" } }, "required": ["mode"] },
+          "then": { "required": ["contacts"] },
+          "else": { "properties": { "contacts": false } }
+        },
+        {
+          "if": { "properties": { "mode": { "const": "other" } }, "required": ["mode"] },
+          "else": { "properties": { "modeDescription": false } }
+        },
+        {
+          "if": { "properties": { "cost": { "const": true } }, "required": ["cost"] },
+          "else": { "properties": { "costDetails": false } }
+        },
+        {
+          "if": { "properties": { "agreementRequired": { "const": true } }, "required": ["agreementRequired"] },
+          "else": { "properties": { "agreementUrl": false } }
+        },
+        {
+          "if": { "properties": { "usesPartner": { "const": true } }, "required": ["usesPartner"] },
+          "else": { "properties": { "partners": false } }
         }
-      },
-      "if": { "properties": { "usesPartner": { "const": true } }, "required": ["usesPartner"] },
-      "then": {
-        "properties": {
-          "partners": {
-            "title": "Onboarding partners",
-            "description": "Third parties onboarding runs through.",
-            "type": "array",
-            "items": { "$ref": "#/$defs/partner" }
-          }
-        }
-      },
-      "else": { "properties": { "partners": false } }
+      ]
     },
     "features": {
       "title": "Features",
@@ -281,6 +326,7 @@
             "title": "Accessed",
             "description": "Date the link was last checked, YYYY-MM-DD.",
             "type": "string",
+            "format": "date",
             "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
           }
         }
@@ -289,7 +335,7 @@
   },
   "$defs": {
     "flag": { "description": "Tri-state: null = unknown.", "type": ["boolean", "null"] },
-    "url": { "type": "string", "pattern": "^https?://[^\\s]+$" },
+    "url": { "type": "string", "format": "uri", "pattern": "^https?://[^\\s]+$" },
     "partner": {
       "title": "Partner",
       "type": "object",
@@ -307,17 +353,21 @@
         "type": "object",
         "required": ["type", "value"],
         "properties": {
-          "type": { "title": "Type", "enum": ["email", "url", "other"] },
+          "type": {
+            "title": "Type",
+            "description": "email: value is an e-mail address. url: value is a web page. form: value is the URL of an online request form. other: free text.",
+            "enum": ["email", "url", "form", "other"]
+          },
           "value": { "title": "Value", "type": "string", "minLength": 1 },
           "label": { "title": "Label", "type": "string" }
         },
         "allOf": [
           {
             "if": { "properties": { "type": { "const": "email" } } },
-            "then": { "properties": { "value": { "pattern": "^[^@\\s]+@[^@\\s]+$" } } }
+            "then": { "properties": { "value": { "format": "email", "pattern": "^[^@\\s]+@[^@\\s]+$" } } }
           },
           {
-            "if": { "properties": { "type": { "const": "url" } } },
+            "if": { "properties": { "type": { "enum": ["url", "form"] } } },
             "then": { "properties": { "value": { "$ref": "#/$defs/url" } } }
           }
         ]

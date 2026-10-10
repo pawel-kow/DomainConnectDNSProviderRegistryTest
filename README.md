@@ -33,7 +33,7 @@ The full definition is [schema/provider.schema.json](schema/provider.schema.json
 - Only `providerId` and `name` are required.
 - Booleans are tri-state: `true`, `false`, or `null`/absent = unknown.
 - Consumers ignore unknown keys.
-- Text fields (`notes`, `onboarding.notes`) are shown verbatim, never rendered as HTML.
+- Text fields (`notes`, `onboarding.notes` and the other free-text fields) are shown verbatim, never rendered as HTML.
 
 | Field | Type | Meaning |
 | --- | --- | --- |
@@ -44,13 +44,17 @@ The full definition is [schema/provider.schema.json](schema/provider.schema.json
 | `logo` | string | Logo file name, in the entry's folder. |
 | `documentation` | `[{title, url}]` | Public Domain Connect documentation. |
 | `contacts.technical` | `[contact]` | Technical contact. |
-| `onboarding.mode` | `"automatic"` \| `"on-request"` | `automatic`: templates merged into the Templates repository are deployed without a request. |
-| `onboarding.documentationUrl` | URL | Process documentation. |
-| `onboarding.formUrl` | URL | Online request form. |
-| `onboarding.contacts` | `[contact]` | Where service providers request onboarding. |
-| `onboarding.usesPartner` | boolean | Onboarding runs through a third party. |
-| `onboarding.partners` | `[{name, url, contacts: [contact]}]` | Third parties onboarding runs through. Allowed only when `usesPartner` is `true`. |
+| `onboarding.mode` | `"automatic"` \| `"on-request"` \| `"other"` | `automatic`: templates merged into the Templates repository are deployed without a request. `on-request`: service providers request onboarding through `onboarding.contacts`. `other`: see `modeDescription`. |
+| `onboarding.updateSchedule` | string | When merged templates are deployed. Only with mode `automatic`. |
+| `onboarding.contacts` | `[contact]` | Where service providers request onboarding. Required with mode `on-request` (at least one), not allowed with any other mode. |
+| `onboarding.modeDescription` | string | How onboarding works. Only with mode `other`. |
+| `onboarding.documentationUrl` | URL | Documentation of the onboarding process. |
 | `onboarding.cost` | boolean | Onboarding is charged. |
+| `onboarding.costDetails` | string | What is charged and how. Only when `cost` is `true`. |
+| `onboarding.agreementRequired` | boolean | A contract or agreement has to be signed, or terms and conditions accepted, before onboarding. |
+| `onboarding.agreementUrl` | URL | The agreement template, or the flow in which it is signed or accepted. Only when `agreementRequired` is `true`. |
+| `onboarding.usesPartner` | boolean | Onboarding runs through a third party. |
+| `onboarding.partners` | `[{name, url, contacts: [contact]}]` | Third parties onboarding runs through. Only when `usesPartner` is `true`. |
 | `onboarding.requirements.signedTemplatesOnly` | boolean | Only templates with signing. |
 | `onboarding.requirements.warnPhishingRejected` | boolean | Templates with `warnPhishing` are not accepted. |
 | `onboarding.requirements.signingKeyPublished` | boolean | The signing key has to be published. |
@@ -78,9 +82,9 @@ The full definition is [schema/provider.schema.json](schema/provider.schema.json
 | `notes` | string | Anything else. |
 | `links` | `[link]` | Generic list of related links; `rel: "source"` marks the sources the entry was built from. |
 
-`contact` is `{"type": "email" | "url" | "other", "value": string, "label"?: string}`.
+`contact` is `{"type": "email" | "url" | "form" | "other", "value": string, "label"?: string}`. With `email` the value is an e-mail address; with `url` (a web page) and `form` (an online request form) it is a URL.
 
-`link` is `{"url": URL, "title"?: string, "rel"?: string, "accessed"?: "YYYY-MM-DD"}`. `rel` is a lowercase token; `source` is the only value defined so far, and consumers ignore values they do not know. `accessed` is the date the link was last checked.
+`link` is `{"url": URL, "title"?: string, "rel"?: string, "accessed"?: "YYYY-MM-DD"}`. `rel` is a lowercase token; `source` is the only value defined so far, and consumers ignore values they do not know. `accessed` is the date the link was last checked, a valid calendar date.
 
 Minimal entry:
 

@@ -10,17 +10,20 @@
       "url": "https://docs.chief.tools/developers/domainchief/guides/domain-connect"
     }
   ],
-  "onboarding": {
-    "mode": "automatic",
-    "documentationUrl": "https://docs.chief.tools/developers/domainchief/guides/domain-connect",
-    "contacts": [
+  "contacts": {
+    "technical": [
       {
         "type": "email",
         "value": "domainconnect@chief.app",
         "label": "Testing a template before it is published, or a published template not recognised"
       }
-    ],
-    "notes": "Compatible templates are imported from the Templates repository each day; no request is needed. The importer validates each template and skips templates that use records or options Domain Chief does not support. The domain domainchief.app (on Domain Chief DNS) can be used to test an integration."
+    ]
+  },
+  "onboarding": {
+    "mode": "automatic",
+    "updateSchedule": "Compatible templates are imported from the Templates repository each day.",
+    "documentationUrl": "https://docs.chief.tools/developers/domainchief/guides/domain-connect",
+    "notes": "No request is needed. The importer validates each template and skips templates that use records or options Domain Chief does not support. The domain domainchief.app (on Domain Chief DNS) can be used to test an integration."
   },
   "features": {
     "syncFlow": true,

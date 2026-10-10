@@ -23,8 +23,8 @@
   "onboarding": {
     "mode": "on-request",
     "documentationUrl": "https://docs.provider.example/domain-connect/onboarding",
-    "formUrl": "https://partners.provider.example/domain-connect/request",
     "contacts": [
+      { "type": "form", "value": "https://partners.provider.example/domain-connect/request" },
       { "type": "email", "value": "domainconnect@provider.example" },
       { "type": "other", "value": "Partner account manager", "label": "Existing partners" }
     ],
@@ -37,6 +37,8 @@
       }
     ],
     "cost": false,
+    "agreementRequired": true,
+    "agreementUrl": "https://partners.provider.example/domain-connect/terms",
     "requirements": {
       "signedTemplatesOnly": true,
       "warnPhishingRejected": true,

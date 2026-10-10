@@ -49,7 +49,8 @@ export async function start(mount) {
     a.href = `https://github.com/${REPO}${a.dataset.repo.replace("{branch}", BRANCH)}`;
   }
   const schema = await (await fetch("../schema/provider.schema.json", { cache: "no-store" })).json();
-  const validate = new ajv2020.default({ allErrors: true, strict: false }).compile(schema);
+  // format only picks the input type in the form; the schema's patterns validate.
+  const validate = new ajv2020.default({ allErrors: true, strict: false, validateFormats: false }).compile(schema);
   let entry = {}, mode = "new", seq = 0;
   const json = () => JSON.stringify(entry, null, 2) + "\n";
   const say = text => { $("message").textContent = text; };
