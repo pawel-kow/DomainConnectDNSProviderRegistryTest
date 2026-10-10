@@ -48,8 +48,8 @@ The full definition is [schema/provider.schema.json](schema/provider.schema.json
 | `onboarding.documentationUrl` | URL | Process documentation. |
 | `onboarding.formUrl` | URL | Online request form. |
 | `onboarding.contacts` | `[contact]` | Where service providers request onboarding. |
-| `onboarding.partner` | `{name, url}` | Third-party onboarding partner. |
 | `onboarding.usesPartner` | boolean | Onboarding runs through a third party. |
+| `onboarding.partners` | `[{name, url, contacts: [contact]}]` | Third parties onboarding runs through. Allowed only when `usesPartner` is `true`. |
 | `onboarding.cost` | boolean | Onboarding is charged. |
 | `onboarding.requirements.signedTemplatesOnly` | boolean | Only templates with signing. |
 | `onboarding.requirements.warnPhishingRejected` | boolean | Templates with `warnPhishing` are not accepted. |

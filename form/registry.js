@@ -54,11 +54,28 @@ export async function start(mount) {
   const json = () => JSON.stringify(entry, null, 2) + "\n";
   const say = text => { $("message").textContent = text; };
 
+  // A value whose schema is false is left out: a conditional property whose condition no
+  // longer holds (onboarding.partners once usesPartner is not true). The form keeps the
+  // value, so it comes back when the condition holds again.
+  function dropForbidden(v) {
+    if (validate(v)) return v;
+    for (const e of validate.errors) {
+      if (e.keyword !== "false schema" || !e.instancePath) continue;
+      const keys = e.instancePath.slice(1).split("/").map(k => k.replace(/~1/g, "/").replace(/~0/g, "~"));
+      const last = keys.pop();
+      const parent = keys.reduce((o, k) => o?.[k], v);
+      if (parent && typeof parent === "object" && !Array.isArray(parent)) delete parent[last];
+    }
+    return prune(v);
+  }
+
   async function update(value) {
-    entry = prune(value ?? {});
+    entry = dropForbidden(prune(value ?? {}));
     $("json").textContent = json();
     const ok = validate(entry);
-    $("errors").replaceChildren(...(validate.errors || []).map(e => {
+    // An "if" error only says that the "then" or "else" branch failed; the errors inside the
+    // branch are listed themselves.
+    $("errors").replaceChildren(...(validate.errors || []).filter(e => e.keyword !== "if").map(e => {
       const li = document.createElement("li");
       li.textContent = `${e.instancePath || "/"}: ${e.message}`;
       return li;

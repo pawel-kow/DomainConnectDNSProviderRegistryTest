@@ -35,7 +35,7 @@
   .rjsf .control-label { display: block; margin-bottom: 2px; }
   .rjsf .required { color: var(--error-text); margin-left: 2px; }
   .rjsf .field-description { color: var(--text-secondary); font-size: 0.8125rem; margin: 2px 0 6px; }
-  .rjsf .has-error input, .rjsf .has-error select { border-color: var(--accent-coral); }
+  .rjsf .has-error:not(.rjsf-field-object, .rjsf-field-array) :is(input, select) { border-color: var(--accent-coral); }
   .rjsf .error-detail { list-style: none; padding: 0; margin: 4px 0 0; color: var(--error-text); font-size: 0.8125rem; }
   .rjsf .rjsf-array-item { gap: var(--spacing-xs); padding: var(--spacing-xs) 0; border-bottom: 1px solid var(--border-color); }
   .rjsf .rjsf-array-item > .col-xs-9 { flex: 1 1 auto; min-width: 0; }
@@ -166,6 +166,8 @@ function mount(el, schema, onChange) {
         widgets,
         formData: data,
         liveValidate: true,
+        // An "if" error sits on the whole object; the errors inside the branch are shown anyway.
+        transformErrors: errors => errors.filter(e => e.name !== "if"),
         showErrorList: false,
         experimental_defaultFormStateBehavior: {
           emptyObjectFields: "skipEmptyDefaults",

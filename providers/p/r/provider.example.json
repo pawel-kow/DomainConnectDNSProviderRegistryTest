@@ -28,11 +28,14 @@
       { "type": "email", "value": "domainconnect@provider.example" },
       { "type": "other", "value": "Partner account manager", "label": "Existing partners" }
     ],
-    "partner": {
-      "name": "Example Onboarding Partner",
-      "url": "https://www.partner.example"
-    },
     "usesPartner": true,
+    "partners": [
+      {
+        "name": "Example Onboarding Partner",
+        "url": "https://www.partner.example",
+        "contacts": [{ "type": "email", "value": "onboarding@partner.example" }]
+      }
+    ],
     "cost": false,
     "requirements": {
       "signedTemplatesOnly": true,

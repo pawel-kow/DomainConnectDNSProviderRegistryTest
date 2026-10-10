@@ -30,9 +30,10 @@ The form MUST handle every construct the schema uses today, generically:
 | S5 | Nested objects, several levels | `features.templates`, `onboarding.requirements` | Grouped and visibly nested, labelled with the object's title. |
 | S6 | Array of objects | `documentation`, `links`, contacts, `features.settings.nonStandard` | Add, remove and reorder items. An empty array is a valid value (`nonStandard: []` means "none") and MUST be kept when loaded. |
 | S7 | `required` in nested objects | `documentation[].title`, `links[].url` | Required fields are marked. |
-| S8 | `allOf` with `if` / `then` | contact `value` must be an e-mail address when `type` is `email`, a URL when `url` | Validated; the error is shown. |
+| S8 | `allOf` with `if` / `then` | contact `value` must be an e-mail address when `type` is `email`, a URL when `url` | Validated; the error is shown. Ajv's summary error with keyword `if` ("must match "then" schema") is neither listed nor shown: it would mark the whole object, and the errors inside the branch are reported anyway. |
 | S9 | `description` | almost every property | Shown as help text, as plain text (never interpreted as HTML). |
 | S10 | `title` | every property, including next to a `$ref` | The label is the `title`. A property without one is labelled with its name. |
+| S11 | Conditional property: `if` / `then` adds it, `else` sets it to `false` | `onboarding.partners`, only while `onboarding.usesPartner` is `true` | The field is shown only while the condition holds. While it does not, a value already entered is left out of the entry (not an error) and comes back when the condition holds again. |
 
 ## Data handling
 
@@ -41,12 +42,13 @@ The form MUST handle every construct the schema uses today, generically:
 - D3 MUST: round trip. Loading any entry in `providers/` and not touching the form produces JSON that is equal to the file (key order and formatting may differ).
 - D4 SHOULD: keys the schema does not know are kept when an entry is loaded and saved ("consumers ignore unknown keys").
 - D5 MUST: the output is the entry as JSON, two-space indent, trailing newline.
+- D6 MUST: a value whose schema resolves to `false` (S11, condition not met) is not written.
 
 ## Validation
 
 - V1 MUST: the entry is validated against the full schema with a JSON Schema draft 2020-12 validator (Ajv 2020), the same draft CI checks with `check-jsonschema`. This result decides whether the entry may be submitted.
 - V2 MUST: all errors are listed with the path of the field (for example `/links/0/accessed: must match pattern ...`).
-- V3 SHOULD: errors are also shown next to the field, once the user has touched it.
+- V3 SHOULD: errors are also shown next to the field, once the user has touched it. An error on an object or array marks that group, not every input inside it.
 
 ## GitHub hand-off
 
@@ -89,7 +91,7 @@ The logo and favicons are taken from the statistics site (MIT licence, Domain Co
 The library-independent parts are kept apart from the library, so that the library could be replaced by changing only `index.html`:
 
 - `form/styles.css`: the design above. Form controls get it through the class `controls` on their container (the library's markup inside `#form`, and the load form).
-- `form/registry.js`: loads the schema, validates with Ajv 2020, entry path, new/existing check, GitHub hand-off, copy, loading entries, and the entry panel. It also drops objects that end up empty (D1); empty arrays and empty strings stay. It calls the library adapter through one function: `mount(element, schema, onChange)` returns (a promise of) `{ setValue(entry) }`, and calls `onChange(entry)` with the form's value once the form is built and on every change, `setValue` included. It needs the global `ajv2020` (Ajv's 2020 bundle from cdnjs, with SRI).
+- `form/registry.js`: loads the schema, validates with Ajv 2020, entry path, new/existing check, GitHub hand-off, copy, loading entries, and the entry panel. It also drops objects that end up empty (D1); empty arrays and empty strings stay. And it drops values that Ajv reports with the keyword `false schema` (D6), so the form library may keep a hidden conditional value. It calls the library adapter through one function: `mount(element, schema, onChange)` returns (a promise of) `{ setValue(entry) }`, and calls `onChange(entry)` with the form's value once the form is built and on every change, `setValue` included. It needs the global `ajv2020` (Ajv's 2020 bundle from cdnjs, with SRI).
 - `form/index.html`: the page (header, intro, load form, form card, entry panel, footer), the import map, the library-specific CSS and the adapter.
 - `form/assets/`: the Domain Connect logo and favicons.
 
@@ -112,6 +114,8 @@ Alternatives tried (each on its own branch, now deleted) and why they were dropp
 - The adapter is a small React component holding the form data in state: `useEffect(() => { onChange(data); }, [data])`. Use a block body: `onChange` returns a promise, and an effect must not return one (React calls it as cleanup: "is not a function").
 - CSS targets RJSF 6 class names: `.rjsf`, `.rjsf-field`, `.rjsf-array-item` (with `.col-xs-9` content and `.array-item-toolbox`), `.rjsf-array-item-add`, `.control-label`, `.field-description`, `.error-detail`, `.has-error`. The core theme's buttons use Bootstrap glyphicons (`glyphicon-plus`, `-remove`, `-arrow-up`, `-arrow-down`, `-copy`); the CSS draws them with Unicode characters. The legend of an array item ("documentation-1 *") is hidden.
 - RJSF shows the schema's root `title` and `description` at the top of the form.
+- Conditional properties (S11): RJSF resolves `if`/`then`/`else` against the form data and merges the branch into the object, so a property added by `then` appears at the end of the object's fields; that is why `usesPartner` is the last property of `onboarding`. A property set to `false` by `else` is not rendered. RJSF keeps the value of a field that disappears; `registry.js` leaves it out of the entry (D6). A failing branch also yields an `if` error on the object (`/onboarding: must match "then" schema`); `transformErrors` drops it in RJSF and `registry.js` drops it from the list.
+- The error border applies only to inputs of a field that is not an object or array (`.has-error:not(.rjsf-field-object, .rjsf-field-array)`): RJSF puts `has-error` on the group's wrapper, and a descendant selector would turn every input in the group red.
 - Field ids follow the path: `root_providerId`, `root_features_syncFlow`, `root_links_0_url`.
 
 ## Status
@@ -124,12 +128,13 @@ On branch `feat/inputform` (not pushed, not merged into `main`):
 4. `Form: shared page style and GitHub hand-off`: `styles.css`, `registry.js`, assets.
 5. `Form: react-jsonschema-form alternative`: `index.html` with RJSF.
 6. `Spec: choose react-jsonschema-form; record decisions, status and tests`: the decision and the rest of this file.
+7. (Not yet committed) Schema: `onboarding.partner` (one object) became `onboarding.partners` (array of `#/$defs/partner`: `name`, `url`, `contacts` as `#/$defs/contacts`), allowed only while `usesPartner` is `true` (`if`/`then`/`else` on `onboarding`); `usesPartner` moved to the end of `onboarding`. `provider.example` and the README follow. The form needed no change for it beyond D6 in `registry.js`.
 
-All acceptance checks pass with RJSF (checked on 2026-10-10): 25 of 25 entries round-trip and validate, a new string and a new flag added to the served schema appear, a minimal entry has exactly two keys, the new-entry and edit links are right, the e-mail contact error is listed and blocks submission, flags write `true`, `false` and nothing, `notes` stays verbatim, unknown keys are kept, inline errors show, no horizontal scroll at 400 px.
+All acceptance checks pass with RJSF (checked on 2026-10-10): 25 of 25 entries round-trip and validate, a new string and a new flag added to the served schema appear, a minimal entry has exactly two keys, the new-entry and edit links are right, the e-mail contact error is listed and blocks submission, flags write `true`, `false` and nothing, `notes` stays verbatim, unknown keys are kept, inline errors show, no horizontal scroll at 400 px. The conditional-property checks (`partners.mjs`) pass too.
 
 ## Testing
 
-Serve the repository root (`.venv/bin/python -m http.server 8765 --bind 127.0.0.1`) and drive `http://127.0.0.1:8765/form/` with Playwright. The scripts are in `.form-tests/` (not tracked by git; see its README and CLAUDE.md): `accept.mjs` and `accept2.mjs` run the checks below, `titles.mjs` checks labels from titles, `clips.mjs` takes screenshots. Run them with `.scratchpad/shared/bin/node-pw <script>`. If they are gone, rebuild them from this list. Wait about 3 s after loading for the CDN modules. The checks:
+Serve the repository root (`.venv/bin/python -m http.server 8765 --bind 127.0.0.1`) and drive `http://127.0.0.1:8765/form/` with Playwright. The scripts are in `.form-tests/` (not tracked by git; see its README and CLAUDE.md): `accept.mjs` and `accept2.mjs` run the checks below, `titles.mjs` checks labels from titles, `partners.mjs` checks the conditional property (S11, D6), `clips.mjs` takes screenshots. Run them with `.scratchpad/shared/bin/node-pw <script>`. If they are gone, rebuild them from this list. Wait about 3 s after loading for the CDN modules. The checks:
 
 - Round trip: for every `providers/*/*/*.json`, fill `#load-id`, submit `#load-form`, and compare `JSON.parse(#json)` with the file (keys sorted); `#errors` must be empty.
 - Schema extension: intercept `**/schema/provider.schema.json` with `page.route` and serve the schema with an extra top-level string and an extra flag under `features`; their names must appear in `#form`'s text. The same way, serve titles to check labels.
@@ -138,6 +143,7 @@ Serve the repository root (`.venv/bin/python -m http.server 8765 --bind 127.0.0.
 - Flags: `selectOption('[id="root_features_syncFlow"]', { label })` with *true*, *false*, *unknown*.
 - Verbatim text: fill `#root_notes` with `<b>a & b</b>`.
 - Invalid contact and unknown keys: route `**/providers/t/e/test.invalid.json` to an entry with `url: "nope"`, an unknown key and a contact `{type: "email", value: "nope"}`, open `?providerId=test.invalid`; `#errors` must contain `/contacts/technical/0/value`, `#submit` must be disabled, the unknown key must stay in `#json`.
+- Conditional property: on a new entry no `root_onboarding_partners*` element exists, nor with `usesPartner` *false*; with *true* the array appears. Add an empty partner: `#errors` lists `/onboarding/partners/0: must have required property 'name'` and no `"then"` error, and the only coral inputs are `providerId`, `name` and the partner's name. Add two partners, the first with an e-mail contact (`root_onboarding_partners_0_contacts_0_*`); `#json` has exactly those in `onboarding.partners`. Set *false*: the field is gone, `onboarding` in `#json` is `{"usesPartner": false}`, `#errors` names nothing under `/onboarding`. Set *true* again: both partners are back. `?providerId=provider.example` shows its partner and the partner's contact.
 - Width: at a 400 px viewport, `document.documentElement.scrollWidth` must be at most 400.
 
 ## Open items

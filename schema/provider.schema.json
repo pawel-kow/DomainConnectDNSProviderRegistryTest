@@ -76,21 +76,6 @@
           "description": "Where service providers request onboarding.",
           "$ref": "#/$defs/contacts"
         },
-        "partner": {
-          "title": "Onboarding partner",
-          "description": "Third-party onboarding partner.",
-          "type": "object",
-          "required": ["name"],
-          "properties": {
-            "name": { "title": "Name", "type": "string", "minLength": 1 },
-            "url": { "title": "Website", "$ref": "#/$defs/url" }
-          }
-        },
-        "usesPartner": {
-          "title": "Uses a partner",
-          "description": "Onboarding runs through a third party.",
-          "$ref": "#/$defs/flag"
-        },
         "cost": {
           "title": "Charged",
           "description": "Onboarding is charged.",
@@ -121,8 +106,25 @@
           "title": "Notes",
           "description": "Further requirements or restrictions, verbatim.",
           "type": "string"
+        },
+        "usesPartner": {
+          "title": "Uses a partner",
+          "description": "Onboarding runs through a third party. Only when true can partners be listed.",
+          "$ref": "#/$defs/flag"
         }
-      }
+      },
+      "if": { "properties": { "usesPartner": { "const": true } }, "required": ["usesPartner"] },
+      "then": {
+        "properties": {
+          "partners": {
+            "title": "Onboarding partners",
+            "description": "Third parties onboarding runs through.",
+            "type": "array",
+            "items": { "$ref": "#/$defs/partner" }
+          }
+        }
+      },
+      "else": { "properties": { "partners": false } }
     },
     "features": {
       "title": "Features",
@@ -288,6 +290,16 @@
   "$defs": {
     "flag": { "description": "Tri-state: null = unknown.", "type": ["boolean", "null"] },
     "url": { "type": "string", "pattern": "^https?://[^\\s]+$" },
+    "partner": {
+      "title": "Partner",
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": { "title": "Name", "type": "string", "minLength": 1 },
+        "url": { "title": "Website", "$ref": "#/$defs/url" },
+        "contacts": { "title": "Contacts", "$ref": "#/$defs/contacts" }
+      }
+    },
     "contacts": {
       "type": "array",
       "items": {
