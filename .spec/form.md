@@ -129,7 +129,7 @@ All acceptance checks pass with RJSF (checked on 2026-10-10): 25 of 25 entries r
 
 ## Testing
 
-Serve the repository root (`.venv/bin/python -m http.server 8765 --bind 127.0.0.1`) and drive `http://127.0.0.1:8765/form/` with Playwright (`npm i playwright` and `npx playwright install chromium` in the scratchpad, not in the repository). Wait about 3 s after loading for the CDN modules. The checks used:
+Serve the repository root (`.venv/bin/python -m http.server 8765 --bind 127.0.0.1`) and drive `http://127.0.0.1:8765/form/` with Playwright. The scripts are in `.scratchpad/shared/form-tests/` (not tracked by git; see its README and CLAUDE.md): `accept.mjs` and `accept2.mjs` run the checks below, `titles.mjs` checks labels from titles, `clips.mjs` takes screenshots. Run them with `.scratchpad/shared/bin/node-pw <script>`. If they are gone, rebuild them from this list. Wait about 3 s after loading for the CDN modules. The checks:
 
 - Round trip: for every `providers/*/*/*.json`, fill `#load-id`, submit `#load-form`, and compare `JSON.parse(#json)` with the file (keys sorted); `#errors` must be empty.
 - Schema extension: intercept `**/schema/provider.schema.json` with `page.route` and serve the schema with an extra top-level string and an extra flag under `features`; their names must appear in `#form`'s text. The same way, serve titles to check labels.
