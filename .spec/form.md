@@ -1,6 +1,6 @@
 # Registry entry form
 
-The web form at `form/index.html` builds a registry entry (one `providers/<a>/<b>/<providerId>.json`), validates it against [schema/provider.schema.json](../schema/provider.schema.json) and opens a pull request on GitHub with it. It can also load an existing entry to change it. This document is the feature set every implementation of the form has to meet.
+The web form at `form/index.html` builds a registry entry (one `providers/<a>/<b>/<providerId>.json`), validates it against [schema/provider.schema.json](../schema/provider.schema.json) and opens a pull request on GitHub with it. It can also load an existing entry to change it. This document is the feature set the form has to meet, the decisions taken, and the state of the work, so that work can resume from it alone.
 
 Requirements use MUST (required), SHOULD (expected, a gap has to be named) and MAY.
 
@@ -27,7 +27,7 @@ The form MUST handle every construct the schema uses today, generically:
 | S2 | Local `$ref` into `$defs`, with sibling keywords | `url: {"description": "Website.", "$ref": "#/$defs/url"}` | Resolved. The sibling `description` is shown. |
 | S3 | Tri-state flag `type: ["boolean", "null"]` | every `features.*` flag | A choice of *unknown*, *true* and *false*. A loaded `null` stays `null` when the field is not touched. *Unknown* writes `null` or leaves the key out; both mean unknown. |
 | S4 | `enum` without `type` | `onboarding.mode`, contact `type` | A select of the enum values. The value written is the enum value as is. |
-| S5 | Nested objects, several levels | `features.templates`, `onboarding.requirements` | Grouped and visibly nested, labelled with the property name. |
+| S5 | Nested objects, several levels | `features.templates`, `onboarding.requirements` | Grouped and visibly nested, labelled with the object's title. |
 | S6 | Array of objects | `documentation`, `links`, contacts, `features.settings.nonStandard` | Add, remove and reorder items. An empty array is a valid value (`nonStandard: []` means "none") and MUST be kept when loaded. |
 | S7 | `required` in nested objects | `documentation[].title`, `links[].url` | Required fields are marked. |
 | S8 | `allOf` with `if` / `then` | contact `value` must be an e-mail address when `type` is `email`, a URL when `url` | Validated; the error is shown. |
@@ -86,29 +86,63 @@ The logo and favicons are taken from the statistics site (MIT licence, Domain Co
 
 ## Code layout
 
-Library-independent parts are shared, so that implementations differ only in the library adapter:
+The library-independent parts are kept apart from the library, so that the library could be replaced by changing only `index.html`:
 
-- `form/styles.css`: the design above, and generic styles for form controls.
-- `form/registry.js`: loads the schema, validates with Ajv 2020, entry path, new/existing check, GitHub hand-off, copy, loading entries, and the entry panel. It calls the library adapter through one function: `mount(element, schema, onChange) → { setValue(entry) }`.
-- `form/index.html`: the page, the library's scripts and the adapter. Library-specific CSS stays here.
+- `form/styles.css`: the design above. Form controls get it through the class `controls` on their container (the library's markup inside `#form`, and the load form).
+- `form/registry.js`: loads the schema, validates with Ajv 2020, entry path, new/existing check, GitHub hand-off, copy, loading entries, and the entry panel. It also drops objects that end up empty (D1); empty arrays and empty strings stay. It calls the library adapter through one function: `mount(element, schema, onChange)` returns (a promise of) `{ setValue(entry) }`, and calls `onChange(entry)` with the form's value once the form is built and on every change, `setValue` included. It needs the global `ajv2020` (Ajv's 2020 bundle from cdnjs, with SRI).
+- `form/index.html`: the page (header, intro, load form, form card, entry panel, footer), the import map, the library-specific CSS and the adapter.
+- `form/assets/`: the Domain Connect logo and favicons.
 
-## Acceptance checks
+## Decision: react-jsonschema-form
 
-1. Every entry in `providers/` loads through `?providerId=` and round-trips (D3), and validates (V1).
-2. A property added to the served schema (for example a new flag under `features`, a new string at the top level) shows up in the form without a change to the form.
-3. A new entry with only `providerId` and `name` produces exactly those two keys (D1).
-4. A contact with `type` `email` and a value without `@` is reported (S8) and blocks submission (G4).
-5. Setting a flag to *unknown*, *true* and *false* writes `null` or nothing, `true` and `false` (S3).
-6. `notes` set to `<b>a & b</b>` comes out unchanged (D2).
-7. The page has no horizontal scroll at 400 px width (H4).
+The form uses [react-jsonschema-form](https://rjsf-team.github.io/react-jsonschema-form/) (RJSF) 6.10.1 with its **core theme** (plain Bootstrap 3 markup, styled in `index.html`). It meets every MUST and SHOULD of this spec with about 50 lines of adapter code and 28 lines of CSS.
 
-## Alternatives
+Alternatives tried (each on its own branch, now deleted) and why they were dropped:
 
-Each implementation lives on its own branch, built from this spec:
+- **[JSON Forms](https://jsonforms.io) 3.8** with Material UI renderers (its vanilla renderers cannot show nested objects). It needs the schema dereferenced first (it does not follow `$ref` when picking a renderer) and a custom flag renderer. Dropped because esm.sh splits Material UI into modules that each carry their own copy of shared React contexts: items of an array of objects (contacts) could not be opened, and the required marker and focus state of labels were lost. Only a build step would fix that, which H1 rules out.
+- **[jsonform](https://github.com/jsonform/jsonform) 2.2.5** (jQuery, last release 2022). It reads an older dialect (no `$ref`, `required` per property, one type per field) and writes descriptions as HTML, so it needed a schema adapter. It still failed D3 for 23 of 25 entries (it drops empty arrays and `null`), D4 (drops unknown keys), V3 (no errors next to fields), and S6 (items can only be removed from the end).
+- **RJSF with its Material UI theme** (`@rjsf/mui`): same esm.sh problem as JSON Forms (no required markers, contexts not shared).
 
-| Branch | Library |
-| --- | --- |
-| `feat/inputform-rjsf` | [react-jsonschema-form](https://rjsf-team.github.io/react-jsonschema-form/) (React, core theme) |
-| `feat/inputform-jsonform` | [jsonform](https://github.com/jsonform/jsonform) (jQuery) |
+## Implementation notes (RJSF)
 
-[JSON Forms](https://jsonforms.io) was tried and dropped. Its renderers that cover the schema need Material UI, and esm.sh splits Material UI into modules that each keep their own copy of shared component state: items of an array of objects (contacts) could not be opened. A build step would avoid that, but H1 rules it out.
+- Libraries come from esm.sh through an import map: `react@19.3.0`, `react-dom@19.3.0`, `@rjsf/core@6.10.1`, `@rjsf/validator-ajv8@6.10.1`. Pick versions at least two weeks old. Ajv 8.17.1 is the cdnjs UMD bundle with SRI.
+- esm.sh pitfalls: map both `react` and `react/` (for `react/jsx-runtime`), and `react-dom/` as `https://esm.sh/react-dom@<v>&external=react/`. Give `@rjsf/core` and `@rjsf/validator-ajv8` the same query (`?external=react,react-dom&deps=@rjsf/utils@<v>`) so they share one `@rjsf/utils`. Two copies of a React library with contexts break silently; check that module URLs match.
+- Validation inside RJSF: `customizeValidator({ AjvClass: ajv2020.default })`. Form props: `liveValidate: true`, `showErrorList: false` (the entry panel lists errors), `experimental_defaultFormStateBehavior: { emptyObjectFields: "skipEmptyDefaults", arrayMinItems: { populate: "never" } }` (D1), `uiSchema: { "ui:submitButtonOptions": { norender: true } }`.
+- Tri-state flags: the `CheckboxWidget` is replaced by a widget that, for a schema whose type allows `boolean` and `null`, renders the core `SelectWidget` with options *true*/*false* and placeholder *unknown* (empty choice = key left out; a loaded `null` is shown as *unknown* and stays `null` while untouched). Any other boolean still gets the core checkbox. RJSF leaves label and description of a boolean to its widget, so this widget renders them itself.
+- The adapter is a small React component holding the form data in state: `useEffect(() => { onChange(data); }, [data])`. Use a block body: `onChange` returns a promise, and an effect must not return one (React calls it as cleanup: "is not a function").
+- CSS targets RJSF 6 class names: `.rjsf`, `.rjsf-field`, `.rjsf-array-item` (with `.col-xs-9` content and `.array-item-toolbox`), `.rjsf-array-item-add`, `.control-label`, `.field-description`, `.error-detail`, `.has-error`. The core theme's buttons use Bootstrap glyphicons (`glyphicon-plus`, `-remove`, `-arrow-up`, `-arrow-down`, `-copy`); the CSS draws them with Unicode characters. The legend of an array item ("documentation-1 *") is hidden.
+- RJSF shows the schema's root `title` and `description` at the top of the form.
+- Field ids follow the path: `root_providerId`, `root_features_syncFlow`, `root_links_0_url`.
+
+## Status
+
+On branch `feat/inputform` (not pushed, not merged into `main`):
+
+1. `WIP: input form page`: the first form (json-editor), now replaced.
+2. `Spec for the entry form`: this file.
+3. `Schema: a title for every property`: 65 titles in `schema/provider.schema.json`, nothing else changed; all entries still validate.
+4. `Form: shared page style and GitHub hand-off`: `styles.css`, `registry.js`, assets.
+5. `Form: react-jsonschema-form alternative`: `index.html` with RJSF.
+6. `Spec: choose react-jsonschema-form; record decisions, status and tests`: the decision and the rest of this file.
+
+All acceptance checks pass with RJSF (checked on 2026-10-10): 25 of 25 entries round-trip and validate, a new string and a new flag added to the served schema appear, a minimal entry has exactly two keys, the new-entry and edit links are right, the e-mail contact error is listed and blocks submission, flags write `true`, `false` and nothing, `notes` stays verbatim, unknown keys are kept, inline errors show, no horizontal scroll at 400 px.
+
+## Testing
+
+Serve the repository root (`.venv/bin/python -m http.server 8765 --bind 127.0.0.1`) and drive `http://127.0.0.1:8765/form/` with Playwright (`npm i playwright` and `npx playwright install chromium` in the scratchpad, not in the repository). Wait about 3 s after loading for the CDN modules. The checks used:
+
+- Round trip: for every `providers/*/*/*.json`, fill `#load-id`, submit `#load-form`, and compare `JSON.parse(#json)` with the file (keys sorted); `#errors` must be empty.
+- Schema extension: intercept `**/schema/provider.schema.json` with `page.route` and serve the schema with an extra top-level string and an extra flag under `features`; their names must appear in `#form`'s text. The same way, serve titles to check labels.
+- Minimal entry: fill the first two visible inputs of `#form`; `#json` must be `{"providerId": …, "name": …}` and `#submit` enabled.
+- Hand-off: in a browser context with clipboard permissions, route `https://github.com/**` to a stub, click `#submit`, and check the popup's URL (`/new/main?filename=…&value=…` for a new entry, `/edit/main/<path>` for `provider.example`) and the text of `#message`.
+- Flags: `selectOption('[id="root_features_syncFlow"]', { label })` with *true*, *false*, *unknown*.
+- Verbatim text: fill `#root_notes` with `<b>a & b</b>`.
+- Invalid contact and unknown keys: route `**/providers/t/e/test.invalid.json` to an entry with `url: "nope"`, an unknown key and a contact `{type: "email", value: "nope"}`, open `?providerId=test.invalid`; `#errors` must contain `/contacts/technical/0/value`, `#submit` must be disabled, the unknown key must stay in `#json`.
+- Width: at a 400 px viewport, `document.documentElement.scrollWidth` must be at most 400.
+
+## Open items
+
+- Some descriptions only repeat their new title (`url` "Website.", `syncFlow` "Synchronous flow.", `onboarding.documentationUrl` "Process documentation."); shorten or drop them.
+- `providers/g/o/godaddy.com.json` has `"onboarding": {"notes": ""}`, which looks like a leftover.
+- The README describes the form only as `form/index.html`; mention `registry.js`, `styles.css` and `assets/` if the layout table should list them.
+- Before merging: squash or reword the `WIP` and "alternative" commit messages, and check the page on GitHub Pages (`.nojekyll`, the CDN modules, the `registry-repository` meta).
