@@ -22,10 +22,36 @@
       "pattern": "^(?=.{1,253}$)([A-Za-z0-9]([A-Za-z0-9-]{0,61}[A-Za-z0-9])?\\.)+[A-Za-z0-9-]{2,63}$"
     },
     "logo": {
-      "title": "Logo file",
-      "description": "Logo file name, in the entry's folder.",
-      "type": "string",
-      "pattern": "^[^/\\\\]+\\.(svg|png|jpg)$"
+      "title": "Logo",
+      "description": "The provider's logo: the address of the image, or the image embedded in the entry.",
+      "oneOf": [
+        {
+          "title": "Logo URL",
+          "description": "Address of the logo image.",
+          "$ref": "#/$defs/url"
+        },
+        {
+          "title": "Embedded logo",
+          "description": "The logo image, stored in the entry.",
+          "type": "object",
+          "properties": {
+            "format": {
+              "title": "Format",
+              "description": "Image format.",
+              "enum": ["svg", "png", "jpg"]
+            },
+            "data": {
+              "title": "Image",
+              "description": "The image file, gzip-compressed and base64-encoded.",
+              "type": "string",
+              "contentEncoding": "base64",
+              "contentMediaType": "application/gzip",
+              "pattern": "^H4sI[A-Za-z0-9+/]*={0,2}$"
+            }
+          },
+          "required": ["format", "data"]
+        }
+      ]
     },
     "documentation": {
       "title": "Documentation",

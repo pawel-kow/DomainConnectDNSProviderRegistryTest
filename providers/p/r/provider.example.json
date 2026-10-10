@@ -3,7 +3,10 @@
   "name": "Example DNS Provider",
   "url": "https://www.provider.example",
   "exampleDomain": "provider.example",
-  "logo": "provider.example.svg",
+  "logo": {
+    "format": "svg",
+    "data": "H4sIAAAAAAAAA3WPQYvDIBSE7/srHm/PqdZKuiw+Dwu9719IG42CiYtKtP31S2jorbcZhvmGUXmdoM1hyYSulL9vxmqth3o6xDQxwTlneZ0Qqh+LI+wlgjN+cuWpV2/qT2yEHDj0EnqJWiVzK+8KqREeBYL1IRB+9tez+OLItCqmFWiEJ4FwJ5RHBBuX0tlh9uFOmIcld9kkb/cg+4chFHK3dR+5xjC+8NZahI3cDcvNxUQ4+3EMBvXvRbEt0Gr7pz/+AQs8/+wIAQAA"
+  },
   "documentation": [
     {
       "title": "Domain Connect",

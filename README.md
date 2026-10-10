@@ -8,7 +8,6 @@ The registry format is a proposal (proposed repository name: `Domain-Connect/Dns
 
 ```
 providers/<a>/<b>/<providerId>.json        one entry per providerId
-providers/<a>/<b>/<providerId>.<svg|png|jpg>   its logo, next to the entry
 schema/provider.schema.json                JSON Schema (draft 2020-12) of an entry
 form/index.html                            web form that opens a pull request with an entry
 ```
@@ -41,7 +40,7 @@ The full definition is [schema/provider.schema.json](schema/provider.schema.json
 | `name` | string | Display name. |
 | `url` | URL | Website. |
 | `exampleDomain` | domain name | A domain that completes discovery at this provider. See [Example domain](#example-domain). |
-| `logo` | string | Logo file name, in the entry's folder. |
+| `logo` | URL \| `{format, data}` | The logo: the address of the image, or the image embedded in the entry. See [Logo](#logo). |
 | `documentation` | `[{title, url}]` | Public Domain Connect documentation. |
 | `contacts.technical` | `[contact]` | Technical contact. |
 | `onboarding.mode` | `"automatic"` \| `"on-request"` \| `"other"` | `automatic`: templates merged into the Templates repository are deployed without a request. `on-request`: service providers request onboarding through `onboarding.contacts`. `other`: see `modeDescription`. |
@@ -93,7 +92,7 @@ Minimal entry:
   "providerId": "namesilo.com",
   "name": "NameSilo",
   "url": "https://www.namesilo.com",
-  "logo": "namesilo.com.png",
+  "logo": { "format": "png", "data": "H4sIAAAAAAAAA…" },
   "onboarding": {
     "mode": "on-request",
     "contacts": [{ "type": "email", "value": "domainconnect@namesilo.com" }]
@@ -109,7 +108,20 @@ Minimal entry:
 }
 ```
 
-Full entry: [providers/p/r/provider.example.json](providers/p/r/provider.example.json) is a dummy entry (`providerId` `provider.example`) that uses every field, with its logo [provider.example.svg](providers/p/r/provider.example.svg). Its values are invented and its `.example` URLs do not resolve.
+(`data` is shortened here.)
+
+Full entry: [providers/p/r/provider.example.json](providers/p/r/provider.example.json) is a dummy entry (`providerId` `provider.example`) that uses every field, with an embedded SVG logo. Its values are invented and its `.example` URLs do not resolve.
+
+## Logo
+
+`logo` is either the URL of the image (`https://…`) or the image itself, embedded in the entry as `{"format": …, "data": …}`, so the registry holds nothing but entries:
+
+- `format` is `svg`, `png` or `jpg` and must match the image.
+- `data` is the image file, gzip-compressed and then base64-encoded (standard alphabet, with padding). It always starts with `H4sI`.
+- A PNG or JPEG is at least 90 × 90 pixels, at most 600 wide and 200 high, at most 6 times as wide as high and at most 2 times as high as wide. The [form](form/index.html) scales a larger upload down to fit in 600 × 200 and rejects one outside the other limits; these limits keep both sides at 90 pixels or more after scaling.
+- An SVG is UTF-8, well-formed XML with an `svg` root in the SVG namespace, without a DOCTYPE, entity declarations or processing instructions (other than the XML declaration), and without active content or external references: no `script` or `foreignObject`, no `on*` attributes, no `javascript:` in any attribute, no animation of `href` or `on*`, no `@import`, and every `href` and `url()` points into the document (`#id`) or is a `data:` PNG, JPEG, GIF or WebP. It has no size limits.
+
+To embed a file by hand: `gzip -9c logo.png | base64 -w0`; then check the entry with `.venv/bin/python scripts/check-logos.py <entry>`.
 
 ## Example domain
 
@@ -123,17 +135,18 @@ A pull request adds or changes an entry. The [form](form/index.html), published 
 
 - validate against [schema/provider.schema.json](schema/provider.schema.json),
 - sit at the path derived from its `providerId`,
-- name a logo file that exists in the same folder, if `logo` is set.
+- not add any file besides the entry (an embedded logo is part of the entry),
+- meet the [Logo](#logo) rules if it embeds a logo.
 
 It should also list the sources of its facts in `links` with `rel: "source"` and an `accessed` date, and must not name a customer's domain (see [Example domain](#example-domain)).
 
 CI ([.github/workflows/ci.yml](.github/workflows/ci.yml)) checks every pull request:
 
 - added and changed entries validate against the schema (all entries when the schema changes),
-- every file under `providers/` is a regular file (no symlink) and either an entry at the path derived from its `providerId` or a logo that an entry in the same folder names; the allowed logo extensions are taken from the schema's `logo` pattern,
-- a logo named by an entry exists,
+- every file under `providers/` is a regular file (no symlink) and an entry at the path derived from its `providerId`; no other files ([scripts/check-files.sh](scripts/check-files.sh)),
+- an embedded logo meets the [Logo](#logo) rules: valid base64 and gzip, `format` matching the image, a PNG or JPEG that is complete and within the size limits, an SVG that is valid and safe ([scripts/check-logos.py](scripts/check-logos.py)),
 - nothing outside `providers/` is added, changed or deleted.
 
-The checks always run from the base branch (`pull_request_target`), so a pull request cannot change them; its files are only read. Run the placement checks locally with `scripts/check-files.sh` (needs `bash`, `git` and `jq`).
+The checks always run from the base branch (`pull_request_target`), so a pull request cannot change them; its files are only read. Run the placement checks locally with `scripts/check-files.sh` (needs `bash`, `git` and `jq`) and the logo checks with `python3 scripts/check-logos.py providers/*/*/*.json` (standard library only).
 
 The form is served by GitHub Pages from the root of `main` (Settings, Pages, Deploy from a branch, `main`, `/ (root)`); `.nojekyll` makes Pages serve the `_` folders under `providers/`. The form reads the schema from the same site, so a schema change needs no change to the form. Preview it locally with `python3 -m http.server` in the repository root and open `http://localhost:8000/form/`.

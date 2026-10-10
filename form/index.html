@@ -49,6 +49,14 @@
   .rjsf .btn:disabled { opacity: 0.4; cursor: not-allowed; }
   .rjsf .btn-danger { color: var(--error-text); }
   .rjsf .glyphicon { font-style: normal; }
+  .image-field figure { margin: 0 0 var(--spacing-xs); }
+  .image-field img { display: block; max-width: 100%; max-height: 210px; box-sizing: border-box; padding: 4px; background: var(--bg-white);
+    border: 1px solid var(--border-color); border-radius: var(--radius-sm); }
+  .image-field figcaption { color: var(--text-secondary); font-size: 0.8125rem; margin-top: 2px; }
+  .image-actions { display: flex; gap: 4px; }
+  .image-actions label { position: relative; overflow: hidden; }
+  .image-actions input { position: absolute; inset: 0; opacity: 0; pointer-events: none; }
+  .image-actions label:focus-within { outline: 2px solid var(--accent-cyan); outline-offset: 2px; }
   .glyphicon-plus::before { content: "+ add"; }
   .glyphicon-remove::before { content: "\2715"; }
   .glyphicon-arrow-up::before { content: "\2191"; }
@@ -106,11 +114,6 @@
         <button id="copy" class="btn">Copy JSON</button>
       </div>
       <p id="message" class="message" aria-live="polite"></p>
-      <p class="muted">
-        A logo cannot be passed through the link. Set <code>logo</code> to its file name, and
-        after the pull request is open, upload the file to the same folder on the pull
-        request's branch (Add file, then Upload files).
-      </p>
       <details id="json-details">
         <summary>JSON</summary>
         <pre id="json"></pre>
@@ -131,7 +134,7 @@ import { createElement as h, useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import Form, { getDefaultRegistry } from "@rjsf/core";
 import { customizeValidator } from "@rjsf/validator-ajv8";
-import { start, fail } from "./registry.js";
+import { start, fail, relevantErrors, embedImage, embeddedImageURL } from "./registry.js";
 
 // A tri-state flag (type boolean or null) is a choice of true and false; the empty choice,
 // "unknown", leaves the key out. RJSF leaves label and description of a boolean to its widget.
@@ -151,6 +154,68 @@ const widgets = {
     : h(CheckboxWidget, p),
 };
 
+// An object with a gzip-compressed, base64-encoded string (contentEncoding base64,
+// contentMediaType application/gzip) and a property with an enum is an embedded image. It is
+// shown as a file upload with a preview; the upload sets both properties, the enum value from
+// the file's content. The encoded string is never shown.
+const isPacked = s => s?.type === "string" && s.contentEncoding === "base64" && s.contentMediaType === "application/gzip";
+const imageKeys = s => {
+  const props = Object.entries(s?.properties || {});
+  const data = props.find(([, p]) => isPacked(p))?.[0];
+  const format = props.find(([, p]) => Array.isArray(p?.enum))?.[0];
+  return data && format ? { data, format } : null;
+};
+const childErrors = es => Object.entries(es || {})
+  .flatMap(([k, v]) => k === "__errors" ? [] : [...(v.__errors || []), ...childErrors(v)]);
+function ImageField(p) {
+  const keys = imageKeys(p.schema), value = p.formData || {};
+  const format = value[keys.format], data = value[keys.data];
+  const [preview, setPreview] = useState(null);
+  const [error, setError] = useState("");
+  useEffect(() => {
+    let url, live = true;
+    setPreview(null);
+    if (format && data) {
+      embeddedImageURL(format, data).then(
+        r => { url = r.url; if (live) setPreview(r); else URL.revokeObjectURL(url); },
+        () => live && setError("The stored image cannot be read."));
+    }
+    return () => { live = false; if (url) URL.revokeObjectURL(url); };
+  }, [format, data]);
+  const set = v => p.onChange({ ...value, [keys.format]: v?.format, [keys.data]: v?.data }, p.fieldPathId.path);
+  async function upload(e) {
+    const file = e.target.files[0];
+    e.target.value = "";
+    if (!file) return;
+    try {
+      set(await embedImage(file, p.schema.properties[keys.format].enum));
+      setError("");
+    } catch (x) { setError(x.message); }
+  }
+  const t = k => p.schema.properties[k].title ?? k;
+  const required = k => (p.schema.required || []).includes(k);
+  const messages = [error, ...childErrors(p.errorSchema)].filter(Boolean);
+  return h("div", { className: "image-field" },
+    p.schema.description && h("p", { className: "field-description" }, p.schema.description),
+    h("label", { className: "control-label", htmlFor: p.fieldPathId.$id }, t(keys.data), required(keys.data) && h("span", { className: "required" }, "*")),
+    preview && h("figure", null,
+      h("img", { src: preview.url, alt: "", onLoad: e => setPreview({ ...preview, w: e.target.naturalWidth, h: e.target.naturalHeight }) }),
+      h("figcaption", null, [
+        `${t(keys.format)}: ${format}`,
+        format !== "svg" && preview.w ? `${preview.w} × ${preview.h} px` : "",
+        `${(preview.size / 1024).toFixed(1)} kB`,
+      ].filter(Boolean).join(" · "))),
+    h("div", { className: "image-actions" },
+      h("label", { className: "btn" },
+        h("input", { type: "file", accept: "image/*", id: p.fieldPathId.$id, onChange: upload, disabled: p.disabled || p.readonly }),
+        data ? "Replace image…" : "Choose image…"),
+      data && h("button", { type: "button", className: "btn btn-danger", onClick: () => { setError(""); set(null); } }, "Remove")),
+    messages.length > 0 && h("ul", { className: "error-detail" },
+      messages.map((m, i) => h("li", { key: i, className: "text-danger" }, m))));
+}
+const { ObjectField } = getDefaultRegistry().fields;
+const fields = { ObjectField: p => imageKeys(p.schema) ? h(ImageField, p) : h(ObjectField, p) };
+
 // format only picks the input type (url, email, date); the schema's patterns validate, as in
 // registry.js. Ajv's uri format would reject the {domain} placeholder in settings links.
 const validator = customizeValidator({ AjvClass: ajv2020.default, ajvOptionsOverrides: { validateFormats: false } });
@@ -166,10 +231,10 @@ function mount(el, schema, onChange) {
         schema,
         validator,
         widgets,
+        fields,
         formData: data,
         liveValidate: true,
-        // An "if" error sits on the whole object; the errors inside the branch are shown anyway.
-        transformErrors: errors => errors.filter(e => e.name !== "if"),
+        transformErrors: errors => relevantErrors(errors, e => e.name, e => e.property),
         showErrorList: false,
         experimental_defaultFormStateBehavior: {
           emptyObjectFields: "skipEmptyDefaults",

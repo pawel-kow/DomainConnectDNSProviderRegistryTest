@@ -72,12 +72,14 @@ jobs:
         working-directory: data
         env:
           CHANGED: ${{ steps.changed.outputs.file }}
-        run: bash ../trusted/scripts/check-files.sh -s ../trusted/schema/provider.schema.json ${CHANGED:+"$CHANGED"}
+        run: bash ../trusted/scripts/check-files.sh ${CHANGED:+"$CHANGED"}
 
       - name: Check the schema against its metaschema
         run: '"$RUNNER_TEMP/venv/bin/check-jsonschema" --check-metaschema trusted/schema/provider.schema.json'
 
-      - name: Validate entries against the schema
+      - name: List entries to check
+        id: entries
+        if: ${{ !cancelled() }}
         working-directory: data
         env:
           FULL: ${{ steps.changed.outputs.full }}
@@ -95,7 +97,15 @@ jobs:
                 # the placement check reports those.
                 if [ -f "$f" ] && [ ! -L "$f" ]; then printf '%s\0' "$f"; fi
               done > "$RUNNER_TEMP/entries"
-          if [ ! -s "$RUNNER_TEMP/entries" ]; then
+          echo "file=$RUNNER_TEMP/entries" >> "$GITHUB_OUTPUT"
+
+      - name: Validate entries against the schema
+        if: ${{ !cancelled() && steps.entries.outcome == 'success' }}
+        working-directory: data
+        env:
+          ENTRIES: ${{ steps.entries.outputs.file }}
+        run: |
+          if [ ! -s "$ENTRIES" ]; then
             echo "No entries to validate."
             exit 0
           fi
@@ -103,6 +113,20 @@ jobs:
           echo "::stop-commands::$token"
           status=0
           xargs -0 "$RUNNER_TEMP/venv/bin/check-jsonschema" \
-            --schemafile "$GITHUB_WORKSPACE/trusted/schema/provider.schema.json" < "$RUNNER_TEMP/entries" || status=$?
+            --schemafile "$GITHUB_WORKSPACE/trusted/schema/provider.schema.json" < "$ENTRIES" || status=$?
           echo "::$token::"
           exit "$status"
+
+      - name: Check embedded logos
+        if: ${{ !cancelled() && steps.entries.outcome == 'success' }}
+        working-directory: data
+        env:
+          ENTRIES: ${{ steps.entries.outputs.file }}
+        # Encoding, format, size limits and SVG content; the script escapes what it prints
+        # from data/, so its ::error lines stay the only workflow commands.
+        run: |
+          if [ ! -s "$ENTRIES" ]; then
+            echo "No entries to check."
+            exit 0
+          fi
+          xargs -0 "$RUNNER_TEMP/venv/bin/python" -I ../trusted/scripts/check-logos.py < "$ENTRIES"
