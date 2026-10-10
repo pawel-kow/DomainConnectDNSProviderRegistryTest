@@ -9,7 +9,7 @@ The registry format is a proposal (proposed repository name: `Domain-Connect/Dns
 ```
 providers/<a>/<b>/<providerId>.json        one entry per providerId
 schema/provider.schema.json                JSON Schema (draft 2020-12) of an entry
-form/index.html                            web form that opens a pull request with an entry
+form/index.html                            web form that builds an entry for a pull request
 TERMS.md                                   submission terms every submitter accepts
 LICENSE                                    CC0 1.0 Universal, the licence of the repository
 AGENTS.md                                  instructions for AI agents that prepare an entry with a user
@@ -136,7 +136,7 @@ A settings URL in `links` may name a domain of the provider even when that domai
 
 ## Contributing
 
-A pull request adds or changes an entry. The [form](form/index.html), published with GitHub Pages, builds an entry from the schema, validates it and opens the pull request on GitHub with the file filled in; it can also load an existing entry to change it. An entry must:
+A pull request adds or changes an entry. The [form](form/index.html), published with GitHub Pages, builds an entry from the schema, validates it and copies its JSON, then opens the file on GitHub, where you paste the JSON and propose the change; it can also load an existing entry to change it. An entry must:
 
 - validate against [schema/provider.schema.json](schema/provider.schema.json),
 - sit at the path derived from its `providerId`,

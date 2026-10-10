@@ -11,8 +11,6 @@ const REPO = ghPages && location.pathname.split("/")[1]
   ? `${ghPages[1]}/${location.pathname.split("/")[1]}`
   : meta("registry-repository");
 const BRANCH = meta("registry-branch");
-// GitHub rejects longer addresses; above this the JSON is copied instead of passed in the link.
-const MAX_URL = 8000;
 
 // Path rule from the README: providers/<a>/<b>/<providerId>.json.
 export function entryPath(id) {
@@ -255,13 +253,15 @@ export async function start(mount) {
     const id = typeof entry.providerId === "string" && entry.providerId ? entry.providerId : "";
     const path = id && !/[/\\]/.test(id) ? entryPath(id) : "";
     $("path").textContent = path || "–";
-    $("submit").disabled = !ok || !path;
+    // Copy first, then GitHub: any change makes the copied JSON stale.
+    $("copy").disabled = !ok || !path;
+    $("github").disabled = true;
+    say("");
     const s = ++seq;
     const isNew = !path || !(await exists(path));
     if (s !== seq) return;
     mode = isNew ? "new" : "edit";
     $("exists").textContent = path ? (isNew ? "new entry" : "changes an existing entry") : "";
-    $("submit").textContent = isNew ? "Open pull request on GitHub" : "Copy JSON and edit on GitHub";
   }
 
   async function copy() {
@@ -275,21 +275,14 @@ export async function start(mount) {
     }
   }
 
-  async function submit() {
+  // GitHub's editor cannot be prefilled with a long entry (the address would be too long), so
+  // the user pastes the copied JSON: into a new file, or over the content of the existing one.
+  function github() {
     const path = entryPath(entry.providerId);
-    let url = `https://github.com/${REPO}/new/${BRANCH}?` +
-      new URLSearchParams({ filename: path, value: json() });
-    if (mode === "edit") {
-      // GitHub's file editor cannot be prefilled; the user pastes the copied JSON.
-      url = `https://github.com/${REPO}/edit/${BRANCH}/${path}`;
-      if (await copy()) say("The JSON is copied. In the GitHub editor, replace the file's content with it.");
-    } else if (url.length > MAX_URL) {
-      url = `https://github.com/${REPO}/new/${BRANCH}?` + new URLSearchParams({ filename: path });
-      if (await copy()) say("The entry is too long for a link. The JSON is copied; paste it into the GitHub editor.");
-    } else {
-      say("");
-    }
-    window.open(url, "_blank", "noopener");
+    window.open(mode === "edit"
+      ? `https://github.com/${REPO}/edit/${BRANCH}/${path}`
+      : `https://github.com/${REPO}/new/${BRANCH}?` + new URLSearchParams({ filename: path }),
+    "_blank", "noopener");
   }
 
   const form = await mount($("form"), schema, update);
@@ -305,8 +298,14 @@ export async function start(mount) {
     $("load-status").textContent = `Loaded ${path}.`;
   }
 
-  $("submit").addEventListener("click", submit);
-  $("copy").addEventListener("click", async () => { if (await copy()) say("The JSON is copied."); });
+  $("copy").addEventListener("click", async () => {
+    if (!(await copy())) return;
+    $("github").disabled = false;
+    say(mode === "edit"
+      ? "The JSON is copied. Edit on GitHub, then replace the file's content with it."
+      : "The JSON is copied. Edit on GitHub, then paste it into the new file.");
+  });
+  $("github").addEventListener("click", github);
   $("load-form").addEventListener("submit", e => { e.preventDefault(); load($("load-id").value.trim()); });
   const id = new URLSearchParams(location.search).get("providerId");
   if (id) { $("load-id").value = id; await load(id); }

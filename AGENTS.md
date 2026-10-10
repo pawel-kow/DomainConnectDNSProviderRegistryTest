@@ -21,7 +21,7 @@ MUST, MUST NOT and SHOULD mean what they say: required, forbidden, expected unle
 
 - Ask whether the user is entitled to represent the DNS provider. If they are not, or are unsure, say that the submission terms require it and stop until they have clarified it with the provider.
 - Ask whether this is a new entry or a change. For a change, load the existing entry (`providers/<a>/<b>/<providerId>.json`) and go through every field of it with the user like ground knowledge: the user confirms, corrects or removes each value. Remove its `consent`: consent is given again by whoever submits the change.
-- The user can also use the [entry form](form/index.html) (published with GitHub Pages) instead of you, or together with you: it validates the entry, handles the logo upload and opens the pull request. Tell them it exists.
+- The user can also use the [entry form](form/index.html) (published with GitHub Pages) instead of you, or together with you: it validates the entry, handles the logo upload, copies the JSON and opens the file on GitHub for the pull request. Tell them it exists.
 
 ## The interview
 

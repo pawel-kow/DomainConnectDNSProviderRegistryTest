@@ -80,8 +80,8 @@
     <section class="card">
       <h2>About this form</h2>
       <p>
-        This form builds an entry for the registry and opens a pull request on GitHub with it.
-        The fields come from the <a href="../schema/provider.schema.json">schema</a>. Before you
+        This form builds an entry for the registry. Copy its JSON, then open the file on GitHub,
+        paste it and propose the change as a pull request. The fields come from the <a href="../schema/provider.schema.json">schema</a>. Before you
         submit, read the rules in the <a data-repo="/blob/{branch}/README.md" href="../README.md">README</a>:
         list a source for every fact in <code>links</code> (<code>rel</code> <code>source</code>
         with an <code>accessed</code> date), and never name a customer's domain. Leave out what
@@ -115,8 +115,8 @@
         <a data-repo="/blob/{branch}/TERMS.md" href="../TERMS.md">submission terms</a> at the end of
         the form. The entry is published under <a data-repo="/blob/{branch}/LICENSE" href="../LICENSE">CC0 1.0</a>.</p>
       <div class="actions">
-        <button id="submit" class="btn primary" disabled>Open pull request on GitHub</button>
-        <button id="copy" class="btn">Copy JSON</button>
+        <button id="copy" class="btn primary" disabled>Copy JSON</button>
+        <button id="github" class="btn" disabled>Edit on GitHub</button>
       </div>
       <p id="message" class="message" aria-live="polite"></p>
       <details id="json-details">
