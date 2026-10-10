@@ -323,7 +323,7 @@
           "properties": {
             "cnameFlattening": {
               "title": "CNAME flattening",
-              "description": "CNAME flattening: templates with a CNAME on the apex.",
+              "description": "CNAME flattening: templates with a CNAME on the apex can be applied without host parameter set. hostRequired is ignored in this case.",
               "$ref": "#/$defs/flag"
             }
           }
