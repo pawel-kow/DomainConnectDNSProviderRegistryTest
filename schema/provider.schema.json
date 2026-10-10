@@ -7,168 +7,249 @@
   "required": ["providerId", "name"],
   "properties": {
     "providerId": {
+      "title": "Provider ID",
       "description": "The providerId of the DNS provider's settings response; determines the path.",
       "type": "string",
       "minLength": 1,
       "pattern": "^[^/\\\\]+$"
     },
-    "name": { "description": "Display name.", "type": "string", "minLength": 1 },
-    "url": { "description": "Website.", "$ref": "#/$defs/url" },
+    "name": { "title": "Name", "description": "Display name.", "type": "string", "minLength": 1 },
+    "url": { "title": "Website", "description": "Website.", "$ref": "#/$defs/url" },
     "exampleDomain": {
+      "title": "Example domain",
       "description": "A domain that completes the whole discovery flow at this provider: its _domainconnect TXT record names the provider's API and the settings response there has this providerId. Only a domain of the provider itself or one the provider lists publicly; never a customer's domain.",
       "type": "string",
       "pattern": "^(?=.{1,253}$)([A-Za-z0-9]([A-Za-z0-9-]{0,61}[A-Za-z0-9])?\\.)+[A-Za-z0-9-]{2,63}$"
     },
     "logo": {
+      "title": "Logo file",
       "description": "Logo file name, in the entry's folder.",
       "type": "string",
       "pattern": "^[^/\\\\]+\\.(svg|png|jpg)$"
     },
     "documentation": {
+      "title": "Documentation",
       "description": "Public Domain Connect documentation.",
       "type": "array",
       "items": {
+        "title": "Document",
         "type": "object",
         "required": ["title", "url"],
         "properties": {
-          "title": { "type": "string", "minLength": 1 },
-          "url": { "$ref": "#/$defs/url" }
+          "title": { "title": "Title", "type": "string", "minLength": 1 },
+          "url": { "title": "URL", "$ref": "#/$defs/url" }
         }
       }
     },
     "contacts": {
+      "title": "Contacts",
       "type": "object",
       "properties": {
-        "technical": { "description": "Technical contact.", "$ref": "#/$defs/contacts" }
+        "technical": {
+          "title": "Technical contacts",
+          "description": "Technical contact.",
+          "$ref": "#/$defs/contacts"
+        }
       }
     },
     "onboarding": {
+      "title": "Onboarding",
       "type": "object",
       "properties": {
         "mode": {
+          "title": "Mode",
           "description": "automatic: templates merged into the Templates repository are deployed without a request.",
           "enum": ["automatic", "on-request"]
         },
-        "documentationUrl": { "description": "Process documentation.", "$ref": "#/$defs/url" },
-        "formUrl": { "description": "Online request form.", "$ref": "#/$defs/url" },
+        "documentationUrl": {
+          "title": "Process documentation",
+          "description": "Process documentation.",
+          "$ref": "#/$defs/url"
+        },
+        "formUrl": {
+          "title": "Request form",
+          "description": "Online request form.",
+          "$ref": "#/$defs/url"
+        },
         "contacts": {
+          "title": "Onboarding contacts",
           "description": "Where service providers request onboarding.",
           "$ref": "#/$defs/contacts"
         },
         "partner": {
+          "title": "Onboarding partner",
           "description": "Third-party onboarding partner.",
           "type": "object",
           "required": ["name"],
           "properties": {
-            "name": { "type": "string", "minLength": 1 },
-            "url": { "$ref": "#/$defs/url" }
+            "name": { "title": "Name", "type": "string", "minLength": 1 },
+            "url": { "title": "Website", "$ref": "#/$defs/url" }
           }
         },
         "usesPartner": {
+          "title": "Uses a partner",
           "description": "Onboarding runs through a third party.",
           "$ref": "#/$defs/flag"
         },
-        "cost": { "description": "Onboarding is charged.", "$ref": "#/$defs/flag" },
+        "cost": {
+          "title": "Charged",
+          "description": "Onboarding is charged.",
+          "$ref": "#/$defs/flag"
+        },
         "requirements": {
+          "title": "Requirements",
           "type": "object",
           "properties": {
             "signedTemplatesOnly": {
+              "title": "Signed templates only",
               "description": "Only templates with signing.",
               "$ref": "#/$defs/flag"
             },
             "warnPhishingRejected": {
+              "title": "warnPhishing rejected",
               "description": "Templates with warnPhishing are not accepted.",
               "$ref": "#/$defs/flag"
             },
             "signingKeyPublished": {
+              "title": "Signing key published",
               "description": "The signing key has to be published.",
               "$ref": "#/$defs/flag"
             }
           }
         },
         "notes": {
+          "title": "Notes",
           "description": "Further requirements or restrictions, verbatim.",
           "type": "string"
         }
       }
     },
     "features": {
+      "title": "Features",
       "type": "object",
       "properties": {
-        "syncFlow": { "description": "Synchronous flow.", "$ref": "#/$defs/flag" },
+        "syncFlow": {
+          "title": "Synchronous flow",
+          "description": "Synchronous flow.",
+          "$ref": "#/$defs/flag"
+        },
         "syncRedirectUri": {
+          "title": "redirect_uri in the synchronous flow",
           "description": "redirect_uri honoured in the synchronous flow.",
           "$ref": "#/$defs/flag"
         },
-        "asyncFlow": { "description": "Asynchronous flow (OAuth).", "$ref": "#/$defs/flag" },
+        "asyncFlow": {
+          "title": "Asynchronous flow",
+          "description": "Asynchronous flow (OAuth).",
+          "$ref": "#/$defs/flag"
+        },
         "asyncRevert": {
+          "title": "Revert in the asynchronous flow",
           "description": "Revert in the asynchronous flow.",
           "$ref": "#/$defs/flag"
         },
         "templateStateTracking": {
+          "title": "Template state tracking",
           "description": "Applied templates are tracked.",
           "$ref": "#/$defs/flag"
         },
         "templates": {
+          "title": "Template features",
           "type": "object",
           "properties": {
             "txtConflictMatching": {
+              "title": "TXT conflict matching",
               "description": "txtConflictMatchingMode / txtConflictMatchingPrefix.",
               "$ref": "#/$defs/flag"
             },
             "variablesInNumberFields": {
+              "title": "Variables in number fields",
               "description": "Variables in TTL, priority, weight, port.",
               "$ref": "#/$defs/flag"
             },
-            "multiInstance": { "description": "multiInstance.", "$ref": "#/$defs/flag" },
+            "multiInstance": {
+              "title": "Multiple instances",
+              "description": "multiInstance.",
+              "$ref": "#/$defs/flag"
+            },
             "sharedNames": {
+              "title": "Shared names",
               "description": "sharedProviderName / sharedServiceName.",
               "$ref": "#/$defs/flag"
             },
-            "essential": { "description": "Record attribute essential.", "$ref": "#/$defs/flag" }
+            "essential": {
+              "title": "Essential records",
+              "description": "Record attribute essential.",
+              "$ref": "#/$defs/flag"
+            }
           }
         },
         "recordTypes": {
+          "title": "Record types",
           "type": "object",
           "properties": {
-            "spfm": { "description": "SPFM.", "$ref": "#/$defs/flag" },
-            "custom": { "description": "Custom RR types.", "$ref": "#/$defs/flag" },
-            "apexCname": { "description": "APEXCNAME.", "$ref": "#/$defs/flag" },
-            "redir301": { "description": "REDIR301.", "$ref": "#/$defs/flag" },
-            "redir302": { "description": "REDIR302.", "$ref": "#/$defs/flag" }
+            "spfm": { "title": "SPFM", "description": "SPFM.", "$ref": "#/$defs/flag" },
+            "custom": {
+              "title": "Custom record types",
+              "description": "Custom RR types.",
+              "$ref": "#/$defs/flag"
+            },
+            "apexCname": {
+              "title": "APEXCNAME",
+              "description": "APEXCNAME.",
+              "$ref": "#/$defs/flag"
+            },
+            "redir301": { "title": "REDIR301", "description": "REDIR301.", "$ref": "#/$defs/flag" },
+            "redir302": { "title": "REDIR302", "description": "REDIR302.", "$ref": "#/$defs/flag" }
           }
         },
         "settings": {
+          "title": "Settings response",
           "description": "Optional properties of the settings response. The values are per domain; only whether the provider returns them is recorded.",
           "type": "object",
           "properties": {
             "urlControlPanel": {
+              "title": "Control panel URL",
               "description": "urlControlPanel is returned.",
               "$ref": "#/$defs/flag"
             },
-            "nameServers": { "description": "nameServers is returned.", "$ref": "#/$defs/flag" },
+            "nameServers": {
+              "title": "Name servers",
+              "description": "nameServers is returned.",
+              "$ref": "#/$defs/flag"
+            },
             "windowSize": {
+              "title": "Window size",
               "description": "width and height of the consent window are returned.",
               "$ref": "#/$defs/flag"
             },
             "nonStandard": {
+              "title": "Non-standard properties",
               "description": "Properties returned that the specification does not define. Empty list = none.",
               "type": "array",
               "items": {
+                "title": "Property",
                 "type": "object",
                 "required": ["key"],
                 "properties": {
-                  "key": { "description": "Property name.", "type": "string", "minLength": 1 },
-                  "description": { "type": "string" }
+                  "key": {
+                    "title": "Name",
+                    "description": "Property name.",
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "description": { "title": "Description", "type": "string" }
                 }
               }
             }
           }
         },
         "nonStandard": {
+          "title": "Non-standard behaviour",
           "type": "object",
           "properties": {
             "cnameFlattening": {
+              "title": "CNAME flattening",
               "description": "CNAME flattening: templates with a CNAME on the apex.",
               "$ref": "#/$defs/flag"
             }
@@ -176,22 +257,26 @@
         }
       }
     },
-    "notes": { "description": "Anything else, verbatim.", "type": "string" },
+    "notes": { "title": "Notes", "description": "Anything else, verbatim.", "type": "string" },
     "links": {
+      "title": "Links",
       "description": "Generic list of links related to the entry. rel \"source\" marks a source the entry's data was taken from. A settings URL queried with a domain that neither belongs to the provider nor is listed publicly by it has the domain replaced by the placeholder {domain}.",
       "type": "array",
       "items": {
+        "title": "Link",
         "type": "object",
         "required": ["url"],
         "properties": {
-          "url": { "$ref": "#/$defs/url" },
-          "title": { "type": "string", "minLength": 1 },
+          "url": { "title": "URL", "$ref": "#/$defs/url" },
+          "title": { "title": "Title", "type": "string", "minLength": 1 },
           "rel": {
+            "title": "Relation",
             "description": "Relation of the link to the entry, e.g. \"source\". Consumers ignore values they do not know.",
             "type": "string",
             "pattern": "^[a-z][a-z0-9-]*$"
           },
           "accessed": {
+            "title": "Accessed",
             "description": "Date the link was last checked, YYYY-MM-DD.",
             "type": "string",
             "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
@@ -206,12 +291,13 @@
     "contacts": {
       "type": "array",
       "items": {
+        "title": "Contact",
         "type": "object",
         "required": ["type", "value"],
         "properties": {
-          "type": { "enum": ["email", "url", "other"] },
-          "value": { "type": "string", "minLength": 1 },
-          "label": { "type": "string" }
+          "type": { "title": "Type", "enum": ["email", "url", "other"] },
+          "value": { "title": "Value", "type": "string", "minLength": 1 },
+          "label": { "title": "Label", "type": "string" }
         },
         "allOf": [
           {

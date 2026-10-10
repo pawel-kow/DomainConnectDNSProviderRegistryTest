@@ -32,7 +32,7 @@ The form MUST handle every construct the schema uses today, generically:
 | S7 | `required` in nested objects | `documentation[].title`, `links[].url` | Required fields are marked. |
 | S8 | `allOf` with `if` / `then` | contact `value` must be an e-mail address when `type` is `email`, a URL when `url` | Validated; the error is shown. |
 | S9 | `description` | almost every property | Shown as help text, as plain text (never interpreted as HTML). |
-| S10 | No `title` | the schema has none today | The label is the property name. A `title` added later is used instead. |
+| S10 | `title` | every property, including next to a `$ref` | The label is the `title`. A property without one is labelled with its name. |
 
 ## Data handling
 
@@ -108,6 +108,7 @@ Each implementation lives on its own branch, built from this spec:
 
 | Branch | Library |
 | --- | --- |
-| `feat/inputform-jsonforms` | [JSON Forms](https://jsonforms.io) (React, Material UI renderers) |
-| `feat/inputform-rjsf` | [react-jsonschema-form](https://rjsf-team.github.io/react-jsonschema-form/) (React) |
+| `feat/inputform-rjsf` | [react-jsonschema-form](https://rjsf-team.github.io/react-jsonschema-form/) (React, core theme) |
 | `feat/inputform-jsonform` | [jsonform](https://github.com/jsonform/jsonform) (jQuery) |
+
+[JSON Forms](https://jsonforms.io) was tried and dropped. Its renderers that cover the schema need Material UI, and esm.sh splits Material UI into modules that each keep their own copy of shared component state: items of an array of objects (contacts) could not be opened. A build step would avoid that, but H1 rules it out.
