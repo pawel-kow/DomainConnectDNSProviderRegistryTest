@@ -85,7 +85,9 @@
         submit, read the rules in the <a data-repo="/blob/{branch}/README.md" href="../README.md">README</a>:
         list a source for every fact in <code>links</code> (<code>rel</code> <code>source</code>
         with an <code>accessed</code> date), and never name a customer's domain. Leave out what
-        you do not know.
+        you do not know. At the end of the form you consent to the
+        <a data-repo="/blob/{branch}/TERMS.md" href="../TERMS.md">submission terms</a>; entries are
+        published under <a data-repo="/blob/{branch}/LICENSE" href="../LICENSE">CC0 1.0</a>.
       </p>
       <form id="load-form" class="load controls">
         <input id="load-id" placeholder="providerId of an existing entry" aria-label="providerId of an existing entry">
@@ -109,6 +111,9 @@
       </dl>
       <p id="valid" hidden>The entry is valid.</p>
       <ul id="errors" aria-live="polite"></ul>
+      <p class="muted">Submitting requires your consent to the
+        <a data-repo="/blob/{branch}/TERMS.md" href="../TERMS.md">submission terms</a> at the end of
+        the form. The entry is published under <a data-repo="/blob/{branch}/LICENSE" href="../LICENSE">CC0 1.0</a>.</p>
       <div class="actions">
         <button id="submit" class="btn primary" disabled>Open pull request on GitHub</button>
         <button id="copy" class="btn">Copy JSON</button>
@@ -234,11 +239,15 @@ function mount(el, schema, onChange) {
         fields,
         formData: data,
         liveValidate: true,
-        transformErrors: errors => relevantErrors(errors, e => e.name, e => e.property),
+        // RJSF makes a required boolean false; an unticked acknowledgement (const true) is
+        // listed by registry.js as a missing property, not shown as "must be equal to constant".
+        transformErrors: errors => relevantErrors(errors, e => e.name, e => e.property)
+          .filter(e => !(e.name === "const" && e.params?.allowedValue === true)),
         showErrorList: false,
         experimental_defaultFormStateBehavior: {
           emptyObjectFields: "skipEmptyDefaults",
           arrayMinItems: { populate: "never" },
+          constAsDefaults: "never",
         },
         uiSchema: { "ui:submitButtonOptions": { norender: true } },
         onChange: e => setData(e.formData),

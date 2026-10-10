@@ -117,6 +117,24 @@ jobs:
           echo "::$token::"
           exit "$status"
 
+      - name: Check consent to the submission terms
+        # Only the entries this push or pull request adds or changes (not on a full run, not all
+        # entries when the schema changes): each needs "consent": true (TERMS.md).
+        if: ${{ !cancelled() && steps.changed.outputs.full == 'false' }}
+        working-directory: data
+        env:
+          CHANGED: ${{ steps.changed.outputs.file }}
+        run: |
+          while IFS= read -r -d '' f; do
+            [[ $f == providers/*.json ]] || continue
+            if [ -f "$f" ] && [ ! -L "$f" ]; then printf '%s\0' "$f"; fi
+          done < "$CHANGED" > "$RUNNER_TEMP/consent"
+          if [ ! -s "$RUNNER_TEMP/consent" ]; then
+            echo "No added or changed entries."
+            exit 0
+          fi
+          xargs -0 "$RUNNER_TEMP/venv/bin/python" -I ../trusted/scripts/check-consent.py < "$RUNNER_TEMP/consent"
+
       - name: Check embedded logos
         if: ${{ !cancelled() && steps.entries.outcome == 'success' }}
         working-directory: data

@@ -10,6 +10,10 @@ The registry format is a proposal (proposed repository name: `Domain-Connect/Dns
 providers/<a>/<b>/<providerId>.json        one entry per providerId
 schema/provider.schema.json                JSON Schema (draft 2020-12) of an entry
 form/index.html                            web form that opens a pull request with an entry
+TERMS.md                                   submission terms every submitter accepts
+LICENSE                                    CC0 1.0 Universal, the licence of the repository
+AGENTS.md                                  instructions for AI agents that prepare an entry with a user
+.github/pull_request_template.md           pull request template
 ```
 
 `<a>` and `<b>` are the first and second character of `providerId`, lowercased. Any character other than `a-z` or `0-9` becomes `_`, and a one-character id has `<b>` = `_`. The file name is `providerId` as is.
@@ -80,6 +84,7 @@ The full definition is [schema/provider.schema.json](schema/provider.schema.json
 | `features.nonStandard.cnameFlattening` | boolean | CNAME flattening: templates with a CNAME on the apex. |
 | `notes` | string | Anything else. |
 | `links` | `[link]` | Generic list of related links; `rel: "source"` marks the sources the entry was built from. |
+| `consent` | `true` | The submitter accepted the [submission terms](TERMS.md) and dedicated the entry to the public domain under CC0 1.0. Not required by the schema, but CI requires it in every added or changed entry; the form asks for it on every submission. See [Licence and submission terms](#licence-and-submission-terms). |
 
 `contact` is `{"type": "email" | "url" | "form" | "other", "value": string, "label"?: string}`. With `email` the value is an e-mail address; with `url` (a web page) and `form` (an online request form) it is a URL.
 
@@ -138,15 +143,24 @@ A pull request adds or changes an entry. The [form](form/index.html), published 
 - not add any file besides the entry (an embedded logo is part of the entry),
 - meet the [Logo](#logo) rules if it embeds a logo.
 
-It should also list the sources of its facts in `links` with `rel: "source"` and an `accessed` date, and must not name a customer's domain (see [Example domain](#example-domain)).
+It should also list the sources of its facts in `links` with `rel: "source"` and an `accessed` date, and must not name a customer's domain (see [Example domain](#example-domain)). Submitting an entry means accepting the [submission terms](TERMS.md) (see [Licence and submission terms](#licence-and-submission-terms)).
+
+Fill in the [pull request template](.github/pull_request_template.md): the entry, a summary, the sources, your relation to the DNS provider, the checklist and the consent. If an AI agent prepares the entry with you, it follows [AGENTS.md](AGENTS.md): it asks you about every field, shows you what it found with the source for you to confirm, never guesses, and asks for your consent to the terms before it opens the pull request.
 
 CI ([.github/workflows/ci.yml](.github/workflows/ci.yml)) checks every pull request:
 
 - added and changed entries validate against the schema (all entries when the schema changes),
 - every file under `providers/` is a regular file (no symlink) and an entry at the path derived from its `providerId`; no other files ([scripts/check-files.sh](scripts/check-files.sh)),
 - an embedded logo meets the [Logo](#logo) rules: valid base64 and gzip, `format` matching the image, a PNG or JPEG that is complete and within the size limits, an SVG that is valid and safe ([scripts/check-logos.py](scripts/check-logos.py)),
+- every added or changed entry has `"consent": true` ([scripts/check-consent.py](scripts/check-consent.py)); entries that a pull request does not touch are not checked,
 - nothing outside `providers/` is added, changed or deleted.
 
 The checks always run from the base branch (`pull_request_target`), so a pull request cannot change them; its files are only read. Run the placement checks locally with `scripts/check-files.sh` (needs `bash`, `git` and `jq`) and the logo checks with `python3 scripts/check-logos.py providers/*/*/*.json` (standard library only).
 
 The form is served by GitHub Pages from the root of `main` (Settings, Pages, Deploy from a branch, `main`, `/ (root)`); `.nojekyll` makes Pages serve the `_` folders under `providers/`. The form reads the schema from the same site, so a schema change needs no change to the form. Preview it locally with `python3 -m http.server` in the repository root and open `http://localhost:8000/form/`.
+
+## Licence and submission terms
+
+The content of this repository is dedicated to the public domain under [CC0 1.0 Universal](LICENSE).
+
+Whoever submits an entry, through the form or as a pull request, accepts the [submission terms](TERMS.md): they may represent the DNS provider, the data matches the provider's actual setup, the entry holds no personal data and every contact belongs to the organisation, they keep the entry up to date, domainconnect.org may use any data in the repository (logos included) to present provider data, statistics and lists on its website, and no one related to domainconnect.org is liable for the content. The form shows this as the last field, *Consent to the submission terms* (`consent`), and does not open the pull request until it is ticked. A loaded entry never brings its `consent` along: every submitter gives it again. CI rejects an added or changed entry without `"consent": true`. Entries compiled from public sources before the terms existed have no `consent`; the first change to such an entry adds it.

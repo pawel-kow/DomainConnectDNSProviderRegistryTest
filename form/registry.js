@@ -196,6 +196,13 @@ export async function embeddedImageURL(format, data) {
   return { url: URL.createObjectURL(new Blob([blob], { type: MEDIA[format] ?? "" })), size: blob.size };
 }
 
+// A property of the entry that is a boolean which must be true (const true) is an
+// acknowledgement, such as the consent to the submission terms. Entry files need not carry it,
+// but the form requires it, and asks for it again on every submission: it is not taken over
+// from a loaded entry. Anything but true is left out (the form library makes a required
+// boolean false), so the error is the missing property.
+const isAcknowledgement = s => s?.type === "boolean" && s.const === true;
+
 const existing = new Map();
 function exists(path) {
   if (!existing.has(path)) {
@@ -209,7 +216,9 @@ export async function start(mount) {
   for (const a of document.querySelectorAll("a[data-repo]")) {
     a.href = `https://github.com/${REPO}${a.dataset.repo.replace("{branch}", BRANCH)}`;
   }
-  const schema = await (await fetch("../schema/provider.schema.json", { cache: "no-store" })).json();
+  const served = await (await fetch("../schema/provider.schema.json", { cache: "no-store" })).json();
+  const acknowledgements = Object.keys(served.properties || {}).filter(k => isAcknowledgement(served.properties[k]));
+  const schema = { ...served, required: [...new Set([...(served.required || []), ...acknowledgements])] };
   // format only picks the input type in the form; the schema's patterns validate.
   const validate = new ajv2020.default({ allErrors: true, strict: false, validateFormats: false }).compile(schema);
   let entry = {}, mode = "new", seq = 0;
@@ -232,7 +241,9 @@ export async function start(mount) {
   }
 
   async function update(value) {
-    entry = dropForbidden(prune(value ?? {}));
+    value = { ...value };
+    for (const k of acknowledgements) if (value[k] !== true) delete value[k];
+    entry = dropForbidden(prune(value));
     $("json").textContent = json();
     const ok = validate(entry);
     $("errors").replaceChildren(...relevantErrors(validate.errors || []).map(e => {
@@ -289,6 +300,7 @@ export async function start(mount) {
     const r = await fetch(`../${path}`, { cache: "no-store" }).catch(() => null);
     if (!r || !r.ok) { $("load-status").textContent = `No entry ${path} found.`; return; }
     const value = await r.json();
+    for (const k of acknowledgements) delete value[k];
     form.setValue(value);
     $("load-status").textContent = `Loaded ${path}.`;
   }

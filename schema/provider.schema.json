@@ -357,6 +357,12 @@
           }
         }
       }
+    },
+    "consent": {
+      "title": "Consent to the submission terms",
+      "description": "I accept the submission terms of this repository (TERMS.md): I may represent the DNS provider, the data matches its actual setup, the entry holds no personal data and every contact belongs to the organisation, I keep the entry up to date, domainconnect.org may use the data and logo on its website, and Domain Connect is not liable for the content. I dedicate the entry to the public domain under CC0 1.0 (LICENSE). Given by whoever submits the entry, on every submission; CI requires it in every added or changed entry.",
+      "type": "boolean",
+      "const": true
     }
   },
   "$defs": {

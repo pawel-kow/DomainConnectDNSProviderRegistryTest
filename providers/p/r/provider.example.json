@@ -110,5 +110,6 @@
       "title": "Service status",
       "rel": "status"
     }
-  ]
+  ],
+  "consent": true
 }
