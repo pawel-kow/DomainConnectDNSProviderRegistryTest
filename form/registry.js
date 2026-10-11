@@ -1,8 +1,9 @@
 // The part of the entry form that does not depend on the form library: schema, validation,
 // entry path, loading entries and the hand-off to GitHub. index.html passes the library
-// adapter: mount(element, schema, onChange) returns { setValue(entry) } and calls
+// adapter: mount(element, schema, onChange) returns { setValue(entry), field(keys) } and calls
 // onChange(entry) with the form's value once it is built and whenever it changes, setValue
-// included. Needs the global ajv2020 (Ajv's 2020 bundle).
+// included. field(keys) is the element the form shows for the value at that list of keys
+// (property names and array indexes), or null. Needs the global ajv2020 (Ajv's 2020 bundle).
 
 const $ = id => document.getElementById(id);
 const meta = name => document.querySelector(`meta[name="${name}"]`).content;
@@ -54,6 +55,12 @@ export function relevantErrors(errors, keyword = e => e.keyword, path = e => e.i
 // A readable location for an instancePath: the title (or name) of each property and the
 // item's title with its number for an array index, e.g. "Links › Link 2 › Accessed".
 export function breadcrumbs(schema, path) {
+  const crumbs = titles(schema, segments(path));
+  return crumbs.length ? crumbs.join(" › ") : schema.title ?? "Entry";
+}
+
+// The titles along a list of keys (see breadcrumbs).
+function titles(schema, keys) {
   const deref = s => {
     while (s && typeof s === "object" && typeof s.$ref === "string" && s.$ref.startsWith("#/")) {
       const t = segments(s.$ref.slice(1)).reduce((o, k) => o?.[k], schema);
@@ -86,7 +93,7 @@ export function breadcrumbs(schema, path) {
   };
   const crumbs = [];
   let node = schema;
-  for (const key of segments(path)) {
+  for (const key of keys) {
     const item = /^\d+$/.test(key) ? items(node) : undefined;
     if (item) {
       crumbs.push(`${deref(item).title ?? "Item"} ${Number(key) + 1}`);
@@ -96,8 +103,16 @@ export function breadcrumbs(schema, path) {
       crumbs.push(node?.title ?? deref(node)?.title ?? key);
     }
   }
-  return crumbs.length ? crumbs.join(" › ") : schema.title ?? "Entry";
+  return crumbs;
 }
+
+// The keys of the field an error is about: for a missing property the property itself.
+const fieldKeys = e => e.keyword === "required" ? [...segments(e.instancePath), e.params.missingProperty] : segments(e.instancePath);
+
+// Ajv's message, with a missing property named by its title, as next to the field.
+const message = (schema, e) => e.keyword === "required"
+  ? `must have required property '${titles(schema, fieldKeys(e)).at(-1)}'`
+  : e.message;
 
 // Why an SVG may not be embedded, or "" if it may: it must be well-formed XML without a
 // DOCTYPE, entity declarations or processing instructions besides the XML declaration, with
@@ -219,7 +234,7 @@ export async function start(mount) {
   const schema = { ...served, required: [...new Set([...(served.required || []), ...acknowledgements])] };
   // format only picks the input type in the form; the schema's patterns validate.
   const validate = new ajv2020.default({ allErrors: true, strict: false, validateFormats: false }).compile(schema);
-  let entry = {}, mode = "new", seq = 0;
+  let entry = {}, mode = "new", seq = 0, form;
   const json = () => JSON.stringify(entry, null, 2) + "\n";
   const say = text => { $("message").textContent = text; };
 
@@ -244,11 +259,7 @@ export async function start(mount) {
     entry = dropForbidden(prune(value));
     $("json").textContent = json();
     const ok = validate(entry);
-    $("errors").replaceChildren(...relevantErrors(validate.errors || []).map(e => {
-      const li = document.createElement("li");
-      li.textContent = `${breadcrumbs(schema, e.instancePath)}: ${e.message}`;
-      return li;
-    }));
+    showErrors(relevantErrors(validate.errors || []));
     $("valid").hidden = !ok;
     const id = typeof entry.providerId === "string" && entry.providerId ? entry.providerId : "";
     const path = id && !/[/\\]/.test(id) ? entryPath(id) : "";
@@ -285,7 +296,41 @@ export async function start(mount) {
     "_blank", "noopener");
   }
 
-  const form = await mount($("form"), schema, update);
+  // The errors, each with a button that jumps to its field (or the nearest group around it
+  // that the form shows). The buttons are added once the form has rendered the change.
+  let frame;
+  function showErrors(errors) {
+    const items = errors.map(e => {
+      const li = document.createElement("li");
+      li.textContent = `${breadcrumbs(schema, e.instancePath)}: ${message(schema, e)}`;
+      return [li, fieldKeys(e)];
+    });
+    $("errors").replaceChildren(...items.map(([li]) => li));
+    cancelAnimationFrame(frame);
+    frame = requestAnimationFrame(() => {
+      for (const [li, keys] of items) {
+        let target = null;
+        for (let k = keys; k.length && !target; k = k.slice(0, -1)) target = form?.field(k);
+        if (!target) continue;
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "jump";
+        b.title = b.ariaLabel = "Go to the field";
+        b.addEventListener("click", () => jump(target));
+        li.append(b);
+      }
+    });
+  }
+
+  function jump(target) {
+    const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    target.scrollIntoView({ block: "center", behavior: reduce ? "auto" : "smooth" });
+    const control = target.matches("input, select, textarea, button")
+      ? target : target.querySelector("input, select, textarea, button");
+    control?.focus({ preventScroll: true });
+  }
+
+  form = await mount($("form"), schema, update);
 
   async function load(id) {
     if (!id) return;

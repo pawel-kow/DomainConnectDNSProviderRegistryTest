@@ -23,6 +23,7 @@
     "react-dom": "https://esm.sh/react-dom@19.3.0?external=react",
     "react-dom/": "https://esm.sh/react-dom@19.3.0&external=react/",
     "@rjsf/core": "https://esm.sh/@rjsf/core@6.10.1?external=react,react-dom&deps=@rjsf/utils@6.10.1",
+    "@rjsf/utils": "https://esm.sh/@rjsf/utils@6.10.1?external=react",
     "@rjsf/validator-ajv8": "https://esm.sh/@rjsf/validator-ajv8@6.10.1?external=react,react-dom&deps=@rjsf/utils@6.10.1"
   }
 }
@@ -139,6 +140,7 @@ import { createElement as h, useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import Form, { getDefaultRegistry } from "@rjsf/core";
 import { customizeValidator } from "@rjsf/validator-ajv8";
+import { toFieldPathId } from "@rjsf/utils";
 import { start, fail, relevantErrors, embedImage, embeddedImageURL } from "./registry.js";
 
 // A tri-state flag (type boolean or null) is a choice of true and false; the empty choice,
@@ -225,15 +227,21 @@ const fields = { ObjectField: p => imageKeys(p.schema) ? h(ImageField, p) : h(Ob
 // registry.js. Ajv's uri format would reject the {domain} placeholder in settings links.
 const validator = customizeValidator({ AjvClass: ajv2020.default, ajvOptionsOverrides: { validateFormats: false } });
 
+// Field ids are built by RJSF from idPrefix, the path and idSeparator (root_links_0_url); an
+// object or array is a fieldset with its id.
+const ids = { idPrefix: "root", idSeparator: "_" };
+const field = el => keys => el.querySelector(`[id="${CSS.escape(toFieldPathId("", ids, keys).$id)}"]`);
+
 function mount(el, schema, onChange) {
   el.classList.add("controls");
   return new Promise(resolve => {
     function Entry() {
       const [data, setData] = useState({});
-      useEffect(() => { resolve({ setValue: setData }); }, []);
+      useEffect(() => { resolve({ setValue: setData, field: field(el) }); }, []);
       useEffect(() => { onChange(data); }, [data]);
       return h(Form, {
         schema,
+        ...ids,
         validator,
         widgets,
         fields,

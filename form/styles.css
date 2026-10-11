@@ -150,6 +150,10 @@ footer.site a:hover { color: var(--light-blue-gray); text-decoration: underline;
 .actions button { flex: 1 1 auto; }
 #errors { margin: 0 0 var(--spacing-sm); padding-left: 1.25rem; font-size: 0.875rem; color: var(--error-text); max-height: 14rem; overflow-y: auto; }
 #errors:empty { display: none; }
+#errors .jump { font: inherit; line-height: 1; cursor: pointer; color: var(--medium-teal); background: none;
+  border: 1px solid var(--light-blue-gray); border-radius: var(--radius-sm); padding: 0 0.3rem; margin-left: 0.35em; vertical-align: baseline; }
+#errors .jump:hover { background: var(--bg-tint); border-color: var(--medium-teal); }
+#errors .jump::before { content: "\2197"; }
 #valid { color: #1e7e34; font-weight: 600; font-size: 0.875rem; }
 .message {
   font-size: 0.875rem;
