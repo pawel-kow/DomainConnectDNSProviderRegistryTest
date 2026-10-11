@@ -155,6 +155,8 @@ CI ([.github/workflows/ci.yml](.github/workflows/ci.yml)) checks every pull requ
 - every added or changed entry has `"consent": true` ([scripts/check-consent.py](scripts/check-consent.py)); entries that a pull request does not touch are not checked,
 - nothing outside `providers/` is added, changed or deleted.
 
+A push to `main` checks every entry against the schema, the placement and the logo rules; the consent check and the rule on files outside `providers/` apply to pull requests only.
+
 The checks always run from the base branch (`pull_request_target`), so a pull request cannot change them; its files are only read. Run the placement checks locally with `scripts/check-files.sh` (needs `bash`, `git` and `jq`) and the logo checks with `python3 scripts/check-logos.py providers/*/*/*.json` (standard library only).
 
 The form is served by GitHub Pages from the root of `main` (Settings, Pages, Deploy from a branch, `main`, `/ (root)`); `.nojekyll` makes Pages serve the `_` folders under `providers/`. The form reads the schema from the same site, so a schema change needs no change to the form. Preview it locally with `python3 -m http.server` in the repository root and open `http://localhost:8000/form/`.

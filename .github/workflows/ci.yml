@@ -46,21 +46,15 @@ jobs:
         id: changed
         working-directory: data
         env:
-          EVENT: ${{ github.event_name }}
           PR_BASE: ${{ github.event.pull_request.base.sha }}
-          PUSH_BEFORE: ${{ github.event.before }}
         run: |
-          case "$EVENT" in
-            pull_request_target) base="$PR_BASE" ;;
-            push) base="$PUSH_BEFORE" ;;
-            *) base= ;;
-          esac
-          # A new branch or a manual run has no base: check everything.
-          if [ -z "$base" ] || ! git cat-file -e "$base^{commit}" 2>/dev/null; then
+          # A push to main or a manual run checks every entry; the rules on changed files
+          # (only providers/, consent) apply to pull requests only.
+          if [ -z "$PR_BASE" ]; then
             echo "full=true" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          git diff -z --name-only --no-renames "$base"...HEAD > "$RUNNER_TEMP/changed"
+          git diff -z --name-only --no-renames "$PR_BASE"...HEAD > "$RUNNER_TEMP/changed"
           echo "full=false" >> "$GITHUB_OUTPUT"
           echo "file=$RUNNER_TEMP/changed" >> "$GITHUB_OUTPUT"
           token=$(openssl rand -hex 16)
@@ -118,8 +112,8 @@ jobs:
           exit "$status"
 
       - name: Check consent to the submission terms
-        # Only the entries this push or pull request adds or changes (not on a full run, not all
-        # entries when the schema changes): each needs "consent": true (TERMS.md).
+        # Only the entries a pull request adds or changes (not all entries when the schema
+        # changes): each needs "consent": true (TERMS.md).
         if: ${{ !cancelled() && steps.changed.outputs.full == 'false' }}
         working-directory: data
         env:
