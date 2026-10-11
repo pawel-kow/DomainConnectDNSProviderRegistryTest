@@ -153,24 +153,13 @@ It should also list the sources of its facts in `links` with `rel: "source"` and
 
 Fill in the [pull request template](.github/pull_request_template.md): the entry, a summary, the sources, your relation to the DNS provider, the checklist and the consent. If an AI agent prepares the entry with you, it follows [AGENTS.md](AGENTS.md): it asks you about every field, shows you what it found with the source for you to confirm, never guesses, and asks for your consent to the terms before it opens the pull request.
 
-CI ([.github/workflows/ci.yml](.github/workflows/ci.yml)) checks every pull request:
+CI checks every pull request:
 
 - added and changed entries validate against the schema (all entries when the schema changes),
 - every file under `providers/` is a regular file (no symlink) and an entry at the path derived from its `providerId`; no other files ([scripts/check-files.sh](scripts/check-files.sh)),
 - an embedded logo meets the [Logo](#logo) rules: valid base64 and gzip, `format` matching the image, a PNG or JPEG that is complete and within the size limits, an SVG that is valid and safe ([scripts/check-logos.py](scripts/check-logos.py)),
 - every added or changed entry has `"consent": true` ([scripts/check-consent.py](scripts/check-consent.py)); entries that a pull request does not touch are not checked,
 - nothing outside `providers/` is added, changed or deleted.
-
-A push to `main` checks every entry against the schema, the placement and the logo rules; the consent check and the rule on files outside `providers/` apply to pull requests only.
-
-The checks always run from the base branch (`pull_request_target`), so a pull request cannot change them; its files are only read. Run the placement checks locally with `scripts/check-files.sh` (needs `bash`, `git` and `jq`) and the logo checks with `python3 scripts/check-logos.py providers/*/*/*.json` (standard library only).
-
-GitHub Pages publishes `pages/` as the site root, with `schema/` and `providers/` next to `form/` (Settings, Pages, Source *GitHub Actions*). [.github/workflows/pages.yml](.github/workflows/pages.yml) deploys them after CI passes on a push to `main`, or when run by hand, and checks that the site, the form and the schema answer. The root redirects to the form. The form reads the schema from the same site, so a schema change needs no change to the form. Preview it locally with the same layout, in the repository root:
-
-```bash
-site=$(mktemp -d) && ln -s "$PWD"/pages/* "$PWD"/schema "$PWD"/providers "$site"
-python3 -m http.server --directory "$site"    # open http://localhost:8000/form/
-```
 
 ## Licence and submission terms
 
