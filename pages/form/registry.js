@@ -253,10 +253,21 @@ export async function start(mount) {
     return prune(v);
   }
 
-  async function update(value) {
+  // The entry the form writes for a value.
+  function written(value) {
     value = { ...value };
     for (const k of acknowledgements) if (value[k] !== true) delete value[k];
-    entry = dropForbidden(prune(value));
+    return dropForbidden(prune(value));
+  }
+
+  // The form has changes when its entry differs from the one last loaded, started or reset.
+  const sorted = v => JSON.stringify(v, (k, x) => x && typeof x === "object" && !Array.isArray(x)
+    ? Object.fromEntries(Object.entries(x).sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0)) : x);
+  let baseline = sorted({});
+  const changed = () => sorted(entry) !== baseline;
+
+  async function update(value) {
+    entry = written(value);
     $("json").textContent = json();
     const ok = validate(entry);
     showErrors(relevantErrors(validate.errors || []));
@@ -332,15 +343,54 @@ export async function start(mount) {
 
   form = await mount($("form"), schema, update);
 
-  async function load(id) {
-    if (!id) return;
+  function set(value) {
+    baseline = sorted(written(value));
+    form.setValue(value);
+    $("github").disabled = true;
+    say("");
+  }
+
+  // A question on the page: act runs once the user confirms. A newer question replaces it.
+  let pending = null;
+  function ask(text, label, act) {
+    $("confirm-text").textContent = text;
+    $("confirm-yes").textContent = label;
+    $("confirm").hidden = false;
+    pending = act;
+    $("confirm-no").focus();
+  }
+  function answer(yes) {
+    const act = pending;
+    pending = null;
+    $("confirm").hidden = true;
+    if (yes) act?.();
+  }
+
+  // An existing entry fills the form; a missing one (404) starts a new entry with only
+  // providerId. An id the schema rejects is not fetched. Changes in the form are replaced only
+  // after a confirmation, except when the page opens.
+  async function load(id, opening = false) {
+    const status = text => { $("load-status").textContent = text; };
+    validate({ providerId: id });
+    const bad = validate.errors.find(e => e.instancePath === "/providerId");
+    if (bad) return status(`"${id}" is not a valid ${titles(schema, ["providerId"])[0]}: it ${bad.message}.`);
     const path = entryPath(id);
     const r = await fetch(`../${path}`, { cache: "no-store" }).catch(() => null);
-    if (!r || !r.ok) { $("load-status").textContent = `No entry ${path} found.`; return; }
-    const value = await r.json();
-    for (const k of acknowledgements) delete value[k];
-    form.setValue(value);
-    $("load-status").textContent = `Loaded ${path}.`;
+    let value, done;
+    if (r?.ok) {
+      try { value = await r.json(); } catch { return status(`${path} could not be loaded: it is not JSON.`); }
+      for (const k of acknowledgements) delete value[k];
+      done = `Loaded ${path}.`;
+    } else if (r?.status === 404) {
+      value = { providerId: id };
+      done = `No entry ${path} exists: a new entry is started.`;
+    } else {
+      return status(`${path} could not be loaded${r ? ` (HTTP ${r.status})` : ""}.`);
+    }
+    const apply = () => { set(value); status(done); };
+    if (opening || !changed()) return apply();
+    status("");
+    ask(`The form has changes. Replace them with ${r.ok ? "the entry" : "a new entry"} ${id}?`, "Replace", apply);
   }
 
   $("copy").addEventListener("click", async () => {
@@ -352,8 +402,16 @@ export async function start(mount) {
   });
   $("github").addEventListener("click", github);
   $("load-form").addEventListener("submit", e => { e.preventDefault(); load($("load-id").value.trim()); });
+  $("reset").addEventListener("click", () => ask("Empty the whole form?", "Reset form", () => {
+    $("load-id").value = "";
+    $("load-status").textContent = "";
+    set({});
+  }));
+  $("confirm-yes").addEventListener("click", () => answer(true));
+  $("confirm-no").addEventListener("click", () => answer(false));
+  // The address is read once.
   const id = new URLSearchParams(location.search).get("providerId");
-  if (id) { $("load-id").value = id; await load(id); }
+  if (id) { $("load-id").value = id; await load(id, true); }
 }
 
 export function fail(e) {

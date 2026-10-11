@@ -178,6 +178,9 @@ pre#json {
 
 .load { display: flex; flex-wrap: wrap; gap: var(--spacing-xs); }
 .load input { flex: 1 1 14rem; width: auto; }
+.confirm { margin-top: var(--spacing-sm); }
+.confirm p { margin: 0 0 var(--spacing-xs); }
+.confirm .actions { margin-bottom: 0; }
 
 /* ===== Form controls =====
  * For a library that brings no styles of its own: put class "controls" on its container. */

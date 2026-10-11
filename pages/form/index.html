@@ -91,10 +91,18 @@
         published under <a data-repo="/blob/{branch}/LICENSE" href="../LICENSE">CC0 1.0</a>.
       </p>
       <form id="load-form" class="load controls">
-        <input id="load-id" placeholder="providerId of an existing entry" aria-label="providerId of an existing entry">
+        <input id="load-id" placeholder="providerId" aria-label="providerId of the entry to load or start">
         <button type="submit" class="btn">Load entry</button>
+        <button type="button" id="reset" class="btn">Reset form</button>
       </form>
       <p id="load-status" class="muted" aria-live="polite"></p>
+      <div id="confirm" class="message confirm" hidden>
+        <p id="confirm-text" aria-live="polite"></p>
+        <div class="actions">
+          <button type="button" id="confirm-yes" class="btn primary"></button>
+          <button type="button" id="confirm-no" class="btn">Cancel</button>
+        </div>
+      </div>
     </section>
 
     <section class="card">
