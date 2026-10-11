@@ -41,10 +41,15 @@ const segments = path => path ? path.slice(1).split("/").map(k => k.replace(/~1/
 // errors inside the branch are listed themselves. A failed oneOf or anyOf also reports every
 // alternative that does not fit the value's type ("must be object" for a string); while
 // another error at or below that path explains the failure, those and the summary are left
-// out. keyword and path read an error's keyword and instance path (Ajv and the form library
-// name them differently).
+// out. Alternatives that fail alike (a value matching no const of a oneOf) are listed once.
+// keyword and path read an error's keyword and instance path (Ajv and the form library name
+// them differently).
 export function relevantErrors(errors, keyword = e => e.keyword, path = e => e.instancePath) {
-  errors = errors.filter(e => keyword(e) !== "if");
+  const seen = new Set();
+  errors = errors.filter(e => {
+    const key = JSON.stringify([keyword(e), path(e), e.message]);
+    return keyword(e) !== "if" && !seen.has(key) && seen.add(key);
+  });
   const branches = new Set(errors.filter(e => ["oneOf", "anyOf"].includes(keyword(e))).map(path));
   const noise = e => branches.has(path(e)) && ["oneOf", "anyOf", "type"].includes(keyword(e));
   const explained = new Set([...branches].filter(p =>
