@@ -13,8 +13,9 @@ Use the [entry form](https://pawel-kow.github.io/DomainConnectDNSProviderRegistr
 ```
 providers/<a>/<b>/<providerId>.json        one entry per providerId
 schema/provider.schema.json                JSON Schema (draft 2020-12) of an entry
-form/index.html                            web form that builds an entry for a pull request
-index.html                                 redirect to form/
+pages/                                     the site root on GitHub Pages
+pages/form/index.html                      web form that builds an entry for a pull request
+pages/index.html                           redirect to form/
 TERMS.md                                   submission terms every submitter accepts
 LICENSE                                    CC0 1.0 Universal, the licence of the repository
 AGENTS.md                                  instructions for AI agents that prepare an entry with a user
@@ -164,7 +165,12 @@ A push to `main` checks every entry against the schema, the placement and the lo
 
 The checks always run from the base branch (`pull_request_target`), so a pull request cannot change them; its files are only read. Run the placement checks locally with `scripts/check-files.sh` (needs `bash`, `git` and `jq`) and the logo checks with `python3 scripts/check-logos.py providers/*/*/*.json` (standard library only).
 
-GitHub Pages publishes `index.html`, `form/`, `schema/`, `providers/` and `.nojekyll` (Settings, Pages, Source *GitHub Actions*). [.github/workflows/pages.yml](.github/workflows/pages.yml) deploys them after CI passes on a push to `main`, or when run by hand, and checks that the site, the form and the schema answer. The root redirects to the form. The form reads the schema from the same site, so a schema change needs no change to the form. Preview it locally with `python3 -m http.server` in the repository root and open `http://localhost:8000/form/`.
+GitHub Pages publishes `pages/` as the site root, with `schema/` and `providers/` next to `form/` (Settings, Pages, Source *GitHub Actions*). [.github/workflows/pages.yml](.github/workflows/pages.yml) deploys them after CI passes on a push to `main`, or when run by hand, and checks that the site, the form and the schema answer. The root redirects to the form. The form reads the schema from the same site, so a schema change needs no change to the form. Preview it locally with the same layout, in the repository root:
+
+```bash
+site=$(mktemp -d) && ln -s "$PWD"/pages/* "$PWD"/schema "$PWD"/providers "$site"
+python3 -m http.server --directory "$site"    # open http://localhost:8000/form/
+```
 
 ## Licence and submission terms
 

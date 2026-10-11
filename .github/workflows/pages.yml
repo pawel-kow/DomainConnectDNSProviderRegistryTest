@@ -1,6 +1,6 @@
 name: Pages
 
-# Publishes the form, the schema and the entries on GitHub Pages after CI passed on a push to
+# Publishes pages/ as the site root, with the schema and the entries, on GitHub Pages after CI passed on a push to
 # main, or by hand. A workflow_run workflow always runs from the default branch.
 on:
   workflow_run:
@@ -42,7 +42,7 @@ jobs:
       - name: Collect the published files
         run: |
           mkdir _site
-          cp -r index.html .nojekyll form schema providers _site/
+          cp -r pages/. schema providers _site/
 
       - uses: actions/configure-pages@v6
 
