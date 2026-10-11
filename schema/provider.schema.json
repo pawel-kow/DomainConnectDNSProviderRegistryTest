@@ -14,7 +14,7 @@
       "pattern": "^[^/\\\\]+$"
     },
     "name": { "title": "Name", "description": "Display name.", "type": "string", "minLength": 1 },
-    "url": { "title": "Website", "description": "Website.", "$ref": "#/$defs/url" },
+    "url": { "title": "Website", "$ref": "#/$defs/url" },
     "exampleDomain": {
       "title": "Example domain",
       "description": "A domain that completes the whole discovery flow at this provider: its _domainconnect TXT record names the provider's API and the settings response there has this providerId. Only a domain of the provider itself or one the provider lists publicly; never a customer's domain.",
@@ -27,17 +27,14 @@
       "oneOf": [
         {
           "title": "Logo URL",
-          "description": "Address of the logo image.",
           "$ref": "#/$defs/url"
         },
         {
           "title": "Embedded logo",
-          "description": "The logo image, stored in the entry.",
           "type": "object",
           "properties": {
             "format": {
               "title": "Format",
-              "description": "Image format.",
               "enum": ["svg", "png", "jpg"]
             },
             "data": {
@@ -73,7 +70,6 @@
       "properties": {
         "technical": {
           "title": "Technical contacts",
-          "description": "Technical contact.",
           "$ref": "#/$defs/contacts"
         }
       }
@@ -107,7 +103,6 @@
         },
         "documentationUrl": {
           "title": "Process documentation",
-          "description": "Documentation of the onboarding process.",
           "$ref": "#/$defs/url"
         },
         "cost": {
@@ -148,7 +143,6 @@
           "properties": {
             "signedTemplatesOnly": {
               "title": "Signed templates only",
-              "description": "Only templates with signing.",
               "$ref": "#/$defs/flag"
             },
             "warnPhishingRejected": {
@@ -158,7 +152,6 @@
             },
             "signingKeyPublished": {
               "title": "Signing key published",
-              "description": "The signing key has to be published.",
               "$ref": "#/$defs/flag"
             }
           }
@@ -203,7 +196,6 @@
       "properties": {
         "syncFlow": {
           "title": "Synchronous flow",
-          "description": "Synchronous flow.",
           "$ref": "#/$defs/flag"
         },
         "syncRedirectUri": {
@@ -213,12 +205,11 @@
         },
         "asyncFlow": {
           "title": "Asynchronous flow",
-          "description": "Asynchronous flow (OAuth).",
+          "description": "The flow based on OAuth.",
           "$ref": "#/$defs/flag"
         },
         "asyncRevert": {
           "title": "Revert in the asynchronous flow",
-          "description": "Revert in the asynchronous flow.",
           "$ref": "#/$defs/flag"
         },
         "templateStateTracking": {
@@ -261,19 +252,17 @@
           "title": "Record types",
           "type": "object",
           "properties": {
-            "spfm": { "title": "SPFM", "description": "SPFM.", "$ref": "#/$defs/flag" },
+            "spfm": { "title": "SPFM", "$ref": "#/$defs/flag" },
             "custom": {
               "title": "Custom record types",
-              "description": "Custom RR types.",
               "$ref": "#/$defs/flag"
             },
             "apexCname": {
               "title": "APEXCNAME",
-              "description": "APEXCNAME.",
               "$ref": "#/$defs/flag"
             },
-            "redir301": { "title": "REDIR301", "description": "REDIR301.", "$ref": "#/$defs/flag" },
-            "redir302": { "title": "REDIR302", "description": "REDIR302.", "$ref": "#/$defs/flag" }
+            "redir301": { "title": "REDIR301", "$ref": "#/$defs/flag" },
+            "redir302": { "title": "REDIR302", "$ref": "#/$defs/flag" }
           }
         },
         "settings": {
@@ -307,7 +296,6 @@
                 "properties": {
                   "key": {
                     "title": "Name",
-                    "description": "Property name.",
                     "type": "string",
                     "minLength": 1
                   },
@@ -323,7 +311,7 @@
           "properties": {
             "cnameFlattening": {
               "title": "CNAME flattening",
-              "description": "CNAME flattening: templates with a CNAME on the apex can be applied without host parameter set. hostRequired is ignored in this case.",
+              "description": "Templates with a CNAME on the apex can be applied without host parameter set. hostRequired is ignored in this case.",
               "$ref": "#/$defs/flag"
             }
           }
@@ -366,7 +354,7 @@
     }
   },
   "$defs": {
-    "flag": { "description": "Tri-state: null = unknown.", "type": ["boolean", "null"] },
+    "flag": { "type": ["boolean", "null"] },
     "url": { "type": "string", "format": "uri", "pattern": "^https?://[^\\s]+$" },
     "partner": {
       "title": "Partner",
