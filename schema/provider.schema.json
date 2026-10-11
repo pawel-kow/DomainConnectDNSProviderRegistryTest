@@ -80,8 +80,13 @@
       "properties": {
         "mode": {
           "title": "Mode",
-          "description": "automatic: templates merged into the Templates repository are deployed without a request. on-request: service providers request onboarding through the onboarding contacts. other: described in the mode description.",
-          "enum": ["automatic", "on-request", "other"]
+          "description": "Automatic: templates merged into the Templates repository are deployed without a request. On request: service providers request onboarding through the onboarding contacts. Other: described in the mode description.",
+          "type": "string",
+          "oneOf": [
+            { "const": "automatic", "title": "Automatic" },
+            { "const": "on-request", "title": "On request" },
+            { "const": "other", "title": "Other" }
+          ]
         },
         "updateSchedule": {
           "title": "Update schedule",
