@@ -1,0 +1,23 @@
+{
+  "providerId": "secureserver.net",
+  "name": "Secure Server",
+  "features": {
+    "syncFlow": true,
+    "asyncFlow": true,
+    "settings": {
+      "urlControlPanel": true,
+      "nameServers": true,
+      "windowSize": false,
+      "nonStandard": []
+    }
+  },
+  "notes": "The settings response has providerDisplayName \"secureserver.net\" and name servers on domaincontrol.com. The settings link queries wildwestdomains.com (Wild West Domains), whose site links its registration agreement to secureserver.net; it has no _domainconnect record.",
+  "links": [
+    {
+      "url": "https://domainconnect.api.secureserver.net/v2/wildwestdomains.com/settings",
+      "title": "Settings response for a Secure Server-hosted domain (providerId, sync and async flow URLs)",
+      "rel": "source",
+      "accessed": "2026-10-09"
+    }
+  ]
+}

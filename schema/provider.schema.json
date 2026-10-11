@@ -7,165 +7,403 @@
   "required": ["providerId", "name"],
   "properties": {
     "providerId": {
+      "title": "Provider ID",
       "description": "The providerId of the DNS provider's settings response; determines the path.",
       "type": "string",
       "minLength": 1,
       "pattern": "^[^/\\\\]+$"
     },
-    "name": { "description": "Display name.", "type": "string", "minLength": 1 },
-    "url": { "description": "Website.", "$ref": "#/$defs/url" },
-    "logo": {
-      "description": "Logo file name, in the entry's folder.",
+    "name": { "title": "Name", "description": "Display name.", "type": "string", "minLength": 1 },
+    "url": { "title": "Website", "description": "Website.", "$ref": "#/$defs/url" },
+    "exampleDomain": {
+      "title": "Example domain",
+      "description": "A domain that completes the whole discovery flow at this provider: its _domainconnect TXT record names the provider's API and the settings response there has this providerId. Only a domain of the provider itself or one the provider lists publicly; never a customer's domain.",
       "type": "string",
-      "pattern": "^[^/\\\\]+\\.(svg|png|jpg)$"
+      "pattern": "^(?=.{1,253}$)([A-Za-z0-9]([A-Za-z0-9-]{0,61}[A-Za-z0-9])?\\.)+[A-Za-z0-9-]{2,63}$"
+    },
+    "logo": {
+      "title": "Logo",
+      "description": "The provider's logo: the address of the image, or the image embedded in the entry.",
+      "oneOf": [
+        {
+          "title": "Logo URL",
+          "description": "Address of the logo image.",
+          "$ref": "#/$defs/url"
+        },
+        {
+          "title": "Embedded logo",
+          "description": "The logo image, stored in the entry.",
+          "type": "object",
+          "properties": {
+            "format": {
+              "title": "Format",
+              "description": "Image format.",
+              "enum": ["svg", "png", "jpg"]
+            },
+            "data": {
+              "title": "Image",
+              "description": "The image file, gzip-compressed and base64-encoded.",
+              "type": "string",
+              "contentEncoding": "base64",
+              "contentMediaType": "application/gzip",
+              "pattern": "^H4sI[A-Za-z0-9+/]*={0,2}$"
+            }
+          },
+          "required": ["format", "data"]
+        }
+      ]
     },
     "documentation": {
+      "title": "Documentation",
       "description": "Public Domain Connect documentation.",
       "type": "array",
       "items": {
+        "title": "Document",
         "type": "object",
         "required": ["title", "url"],
         "properties": {
-          "title": { "type": "string", "minLength": 1 },
-          "url": { "$ref": "#/$defs/url" }
+          "title": { "title": "Title", "type": "string", "minLength": 1 },
+          "url": { "title": "URL", "$ref": "#/$defs/url" }
         }
       }
     },
     "contacts": {
+      "title": "Contacts",
       "type": "object",
       "properties": {
-        "technical": { "description": "Technical contact.", "$ref": "#/$defs/contacts" }
+        "technical": {
+          "title": "Technical contacts",
+          "description": "Technical contact.",
+          "$ref": "#/$defs/contacts"
+        }
       }
     },
     "onboarding": {
+      "title": "Onboarding",
       "type": "object",
       "properties": {
         "mode": {
-          "description": "automatic: templates merged into the Templates repository are deployed without a request.",
-          "enum": ["automatic", "on-request"]
+          "title": "Mode",
+          "description": "automatic: templates merged into the Templates repository are deployed without a request. on-request: service providers request onboarding through the onboarding contacts. other: described in the mode description.",
+          "enum": ["automatic", "on-request", "other"]
         },
-        "documentationUrl": { "description": "Process documentation.", "$ref": "#/$defs/url" },
-        "formUrl": { "description": "Online request form.", "$ref": "#/$defs/url" },
+        "updateSchedule": {
+          "title": "Update schedule",
+          "description": "When templates merged into the Templates repository are deployed, for example daily. Only with mode automatic.",
+          "type": "string",
+          "minLength": 1
+        },
         "contacts": {
-          "description": "Where service providers request onboarding.",
-          "$ref": "#/$defs/contacts"
+          "title": "Onboarding contacts",
+          "description": "Where service providers request onboarding. Required, with at least one contact, with mode on-request; not allowed otherwise.",
+          "$ref": "#/$defs/contacts",
+          "minItems": 1
         },
-        "partner": {
-          "description": "Third-party onboarding partner.",
-          "type": "object",
-          "required": ["name"],
-          "properties": {
-            "name": { "type": "string", "minLength": 1 },
-            "url": { "$ref": "#/$defs/url" }
-          }
+        "modeDescription": {
+          "title": "Description",
+          "description": "How onboarding works. Only with mode other.",
+          "type": "string",
+          "minLength": 1
+        },
+        "documentationUrl": {
+          "title": "Process documentation",
+          "description": "Documentation of the onboarding process.",
+          "$ref": "#/$defs/url"
+        },
+        "cost": {
+          "title": "Charged",
+          "description": "Onboarding is charged.",
+          "$ref": "#/$defs/flag"
+        },
+        "costDetails": {
+          "title": "Details",
+          "description": "What is charged and how. Only when charged is true.",
+          "type": "string",
+          "minLength": 1
+        },
+        "agreementRequired": {
+          "title": "Contract, agreement or T&C acceptance required",
+          "description": "A contract or agreement has to be signed, or terms and conditions accepted, before onboarding.",
+          "$ref": "#/$defs/flag"
+        },
+        "agreementUrl": {
+          "title": "Agreement URL",
+          "description": "The agreement template, or the flow in which it is signed or accepted. Only when an agreement is required.",
+          "$ref": "#/$defs/url"
         },
         "usesPartner": {
+          "title": "Uses a partner",
           "description": "Onboarding runs through a third party.",
           "$ref": "#/$defs/flag"
         },
-        "cost": { "description": "Onboarding is charged.", "$ref": "#/$defs/flag" },
+        "partners": {
+          "title": "Onboarding partners",
+          "description": "Third parties onboarding runs through. Only when uses a partner is true.",
+          "type": "array",
+          "items": { "$ref": "#/$defs/partner" }
+        },
         "requirements": {
+          "title": "Requirements",
           "type": "object",
           "properties": {
             "signedTemplatesOnly": {
+              "title": "Signed templates only",
               "description": "Only templates with signing.",
               "$ref": "#/$defs/flag"
             },
             "warnPhishingRejected": {
+              "title": "warnPhishing rejected",
               "description": "Templates with warnPhishing are not accepted.",
               "$ref": "#/$defs/flag"
             },
             "signingKeyPublished": {
+              "title": "Signing key published",
               "description": "The signing key has to be published.",
               "$ref": "#/$defs/flag"
             }
           }
         },
         "notes": {
+          "title": "Notes",
           "description": "Further requirements or restrictions, verbatim.",
           "type": "string"
         }
-      }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "mode": { "const": "automatic" } }, "required": ["mode"] },
+          "else": { "properties": { "updateSchedule": false } }
+        },
+        {
+          "if": { "properties": { "mode": { "const": "on-request" } }, "required": ["mode"] },
+          "then": { "required": ["contacts"] },
+          "else": { "properties": { "contacts": false } }
+        },
+        {
+          "if": { "properties": { "mode": { "const": "other" } }, "required": ["mode"] },
+          "else": { "properties": { "modeDescription": false } }
+        },
+        {
+          "if": { "properties": { "cost": { "const": true } }, "required": ["cost"] },
+          "else": { "properties": { "costDetails": false } }
+        },
+        {
+          "if": { "properties": { "agreementRequired": { "const": true } }, "required": ["agreementRequired"] },
+          "else": { "properties": { "agreementUrl": false } }
+        },
+        {
+          "if": { "properties": { "usesPartner": { "const": true } }, "required": ["usesPartner"] },
+          "else": { "properties": { "partners": false } }
+        }
+      ]
     },
     "features": {
+      "title": "Features",
       "type": "object",
       "properties": {
-        "syncFlow": { "description": "Synchronous flow.", "$ref": "#/$defs/flag" },
+        "syncFlow": {
+          "title": "Synchronous flow",
+          "description": "Synchronous flow.",
+          "$ref": "#/$defs/flag"
+        },
         "syncRedirectUri": {
+          "title": "redirect_uri in the synchronous flow",
           "description": "redirect_uri honoured in the synchronous flow.",
           "$ref": "#/$defs/flag"
         },
-        "asyncFlow": { "description": "Asynchronous flow (OAuth).", "$ref": "#/$defs/flag" },
+        "asyncFlow": {
+          "title": "Asynchronous flow",
+          "description": "Asynchronous flow (OAuth).",
+          "$ref": "#/$defs/flag"
+        },
         "asyncRevert": {
+          "title": "Revert in the asynchronous flow",
           "description": "Revert in the asynchronous flow.",
           "$ref": "#/$defs/flag"
         },
         "templateStateTracking": {
+          "title": "Template state tracking",
           "description": "Applied templates are tracked.",
           "$ref": "#/$defs/flag"
         },
         "templates": {
+          "title": "Template features",
           "type": "object",
           "properties": {
             "txtConflictMatching": {
+              "title": "TXT conflict matching",
               "description": "txtConflictMatchingMode / txtConflictMatchingPrefix.",
               "$ref": "#/$defs/flag"
             },
             "variablesInNumberFields": {
+              "title": "Variables in number fields",
               "description": "Variables in TTL, priority, weight, port.",
               "$ref": "#/$defs/flag"
             },
-            "multiInstance": { "description": "multiInstance.", "$ref": "#/$defs/flag" },
+            "multiInstance": {
+              "title": "Multiple instances",
+              "description": "multiInstance.",
+              "$ref": "#/$defs/flag"
+            },
             "sharedNames": {
+              "title": "Shared names",
               "description": "sharedProviderName / sharedServiceName.",
               "$ref": "#/$defs/flag"
             },
-            "essential": { "description": "Record attribute essential.", "$ref": "#/$defs/flag" }
+            "essential": {
+              "title": "Essential records",
+              "description": "Record attribute essential.",
+              "$ref": "#/$defs/flag"
+            }
           }
         },
         "recordTypes": {
+          "title": "Record types",
           "type": "object",
           "properties": {
-            "spfm": { "description": "SPFM.", "$ref": "#/$defs/flag" },
-            "custom": { "description": "Custom RR types.", "$ref": "#/$defs/flag" },
-            "apexCname": { "description": "APEXCNAME.", "$ref": "#/$defs/flag" },
-            "redir301": { "description": "REDIR301.", "$ref": "#/$defs/flag" },
-            "redir302": { "description": "REDIR302.", "$ref": "#/$defs/flag" }
+            "spfm": { "title": "SPFM", "description": "SPFM.", "$ref": "#/$defs/flag" },
+            "custom": {
+              "title": "Custom record types",
+              "description": "Custom RR types.",
+              "$ref": "#/$defs/flag"
+            },
+            "apexCname": {
+              "title": "APEXCNAME",
+              "description": "APEXCNAME.",
+              "$ref": "#/$defs/flag"
+            },
+            "redir301": { "title": "REDIR301", "description": "REDIR301.", "$ref": "#/$defs/flag" },
+            "redir302": { "title": "REDIR302", "description": "REDIR302.", "$ref": "#/$defs/flag" }
+          }
+        },
+        "settings": {
+          "title": "Settings response",
+          "description": "Optional properties of the settings response. The values are per domain; only whether the provider returns them is recorded.",
+          "type": "object",
+          "properties": {
+            "urlControlPanel": {
+              "title": "Control panel URL",
+              "description": "urlControlPanel is returned.",
+              "$ref": "#/$defs/flag"
+            },
+            "nameServers": {
+              "title": "Name servers",
+              "description": "nameServers is returned.",
+              "$ref": "#/$defs/flag"
+            },
+            "windowSize": {
+              "title": "Window size",
+              "description": "width and height of the consent window are returned.",
+              "$ref": "#/$defs/flag"
+            },
+            "nonStandard": {
+              "title": "Non-standard properties",
+              "description": "Properties returned that the specification does not define. Empty list = none.",
+              "type": "array",
+              "items": {
+                "title": "Property",
+                "type": "object",
+                "required": ["key"],
+                "properties": {
+                  "key": {
+                    "title": "Name",
+                    "description": "Property name.",
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "description": { "title": "Description", "type": "string" }
+                }
+              }
+            }
           }
         },
         "nonStandard": {
+          "title": "Non-standard behaviour",
           "type": "object",
           "properties": {
             "cnameFlattening": {
-              "description": "CNAME flattening: templates with a CNAME on the apex.",
+              "title": "CNAME flattening",
+              "description": "CNAME flattening: templates with a CNAME on the apex can be applied without host parameter set. hostRequired is ignored in this case.",
               "$ref": "#/$defs/flag"
             }
           }
         }
       }
     },
-    "notes": { "description": "Anything else, verbatim.", "type": "string" }
+    "notes": { "title": "Notes", "description": "Anything else, verbatim.", "type": "string" },
+    "links": {
+      "title": "Links",
+      "description": "Generic list of links related to the entry. rel \"source\" marks a source the entry's data was taken from. A settings URL queried with a domain that neither belongs to the provider nor is listed publicly by it has the domain replaced by the placeholder {domain}.",
+      "type": "array",
+      "items": {
+        "title": "Link",
+        "type": "object",
+        "required": ["url"],
+        "properties": {
+          "url": { "title": "URL", "$ref": "#/$defs/url" },
+          "title": { "title": "Title", "type": "string", "minLength": 1 },
+          "rel": {
+            "title": "Relation",
+            "description": "Relation of the link to the entry, e.g. \"source\". Consumers ignore values they do not know.",
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]*$"
+          },
+          "accessed": {
+            "title": "Accessed",
+            "description": "Date the link was last checked, YYYY-MM-DD.",
+            "type": "string",
+            "format": "date",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          }
+        }
+      }
+    },
+    "consent": {
+      "title": "Consent to the submission terms",
+      "description": "I accept the submission terms of this repository (TERMS.md): I may represent the DNS provider, the data matches its actual setup, the entry holds no personal data and every contact belongs to the organisation, I keep the entry up to date, domainconnect.org may use the data and logo on its website, and Domain Connect is not liable for the content. I dedicate the entry to the public domain under CC0 1.0 (LICENSE). Given by whoever submits the entry, on every submission; CI requires it in every added or changed entry.",
+      "type": "boolean",
+      "const": true
+    }
   },
   "$defs": {
     "flag": { "description": "Tri-state: null = unknown.", "type": ["boolean", "null"] },
-    "url": { "type": "string", "pattern": "^https?://[^\\s]+$" },
+    "url": { "type": "string", "format": "uri", "pattern": "^https?://[^\\s]+$" },
+    "partner": {
+      "title": "Partner",
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": { "title": "Name", "type": "string", "minLength": 1 },
+        "url": { "title": "Website", "$ref": "#/$defs/url" },
+        "contacts": { "title": "Contacts", "$ref": "#/$defs/contacts" }
+      }
+    },
     "contacts": {
       "type": "array",
       "items": {
+        "title": "Contact",
         "type": "object",
         "required": ["type", "value"],
         "properties": {
-          "type": { "enum": ["email", "url", "other"] },
-          "value": { "type": "string", "minLength": 1 },
-          "label": { "type": "string" }
+          "type": {
+            "title": "Type",
+            "description": "email: value is an e-mail address. url: value is a web page. form: value is the URL of an online request form. other: free text.",
+            "enum": ["email", "url", "form", "other"]
+          },
+          "value": { "title": "Value", "type": "string", "minLength": 1 },
+          "label": { 
+            "title": "Label", 
+            "type": "string", 
+            "description": "Optional label or added information for the contact, e.g. to differentiate multiple inputs of same type." 
+          }
         },
         "allOf": [
           {
             "if": { "properties": { "type": { "const": "email" } } },
-            "then": { "properties": { "value": { "pattern": "^[^@\\s]+@[^@\\s]+$" } } }
+            "then": { "properties": { "value": { "format": "email", "pattern": "^[^@\\s]+@[^@\\s]+$" } } }
           },
           {
-            "if": { "properties": { "type": { "const": "url" } } },
+            "if": { "properties": { "type": { "enum": ["url", "form"] } } },
             "then": { "properties": { "value": { "$ref": "#/$defs/url" } } }
           }
         ]

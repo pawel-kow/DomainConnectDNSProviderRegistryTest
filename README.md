@@ -1,17 +1,19 @@
-# Domain Connect DNS Provider Registry (test)
+# Domain Connect DNS Provider Registry
 
-A test version of the Domain Connect DNS provider registry: a set of JSON files, one per DNS provider, holding facts about Domain Connect support that cannot be measured by scanning DNS providers: logo, website, documentation, contacts, onboarding process and supported features.
+The Domain Connect DNS provider registry: a set of JSON files, one per DNS provider, holding facts about Domain Connect support that cannot be measured by scanning DNS providers: logo, website, documentation, contacts, onboarding process and supported features.
 
-The registry format is a proposal. The real registry repository does not exist yet (proposed name: `Domain-Connect/DnsProviders`).
-
-> **All data here is fictional.** URLs and contacts use `.example` domains, and the logos are placeholder SVGs, not real brand logos. The entries are a development data set and test fixture for registry consumers, not information about the real companies.
+The registry format is a proposal (proposed repository name: `Domain-Connect/DnsProviders`). This first version has one entry for every DNS provider listed on [domainconnect.org/dns-providers](https://www.domainconnect.org/dns-providers/), with the logo published there. Each entry was completed from the provider's public documentation and its live Domain Connect settings response, and lists every source it used in `links`.
 
 ## Layout
 
 ```
 providers/<a>/<b>/<providerId>.json        one entry per providerId
-providers/<a>/<b>/<providerId>.<svg|png>   its logo, next to the entry
 schema/provider.schema.json                JSON Schema (draft 2020-12) of an entry
+form/index.html                            web form that builds an entry for a pull request
+TERMS.md                                   submission terms every submitter accepts
+LICENSE                                    CC0 1.0 Universal, the licence of the repository
+AGENTS.md                                  instructions for AI agents that prepare an entry with a user
+.github/pull_request_template.md           pull request template
 ```
 
 `<a>` and `<b>` are the first and second character of `providerId`, lowercased. Any character other than `a-z` or `0-9` becomes `_`, and a one-character id has `<b>` = `_`. The file name is `providerId` as is.
@@ -19,6 +21,7 @@ schema/provider.schema.json                JSON Schema (draft 2020-12) of an ent
 | `providerId` | Entry path |
 | --- | --- |
 | `cloudflare.com` | `providers/c/l/cloudflare.com.json` |
+| `domainchief` | `providers/d/o/domainchief.json` |
 | `1and1` | `providers/1/a/1and1.json` |
 | `x` | `providers/x/_/x.json` |
 
@@ -33,23 +36,28 @@ The full definition is [schema/provider.schema.json](schema/provider.schema.json
 - Only `providerId` and `name` are required.
 - Booleans are tri-state: `true`, `false`, or `null`/absent = unknown.
 - Consumers ignore unknown keys.
-- Text fields (`notes`, `onboarding.notes`) are shown verbatim, never rendered as HTML.
+- Text fields (`notes`, `onboarding.notes` and the other free-text fields) are shown verbatim, never rendered as HTML.
 
 | Field | Type | Meaning |
 | --- | --- | --- |
 | `providerId` | string | Key; equals the settings `providerId`; determines the path. |
 | `name` | string | Display name. |
 | `url` | URL | Website. |
-| `logo` | string | Logo file name, in the entry's folder. |
+| `exampleDomain` | domain name | A domain that completes discovery at this provider. See [Example domain](#example-domain). |
+| `logo` | URL \| `{format, data}` | The logo: the address of the image, or the image embedded in the entry. See [Logo](#logo). |
 | `documentation` | `[{title, url}]` | Public Domain Connect documentation. |
 | `contacts.technical` | `[contact]` | Technical contact. |
-| `onboarding.mode` | `"automatic"` \| `"on-request"` | `automatic`: templates merged into the Templates repository are deployed without a request. |
-| `onboarding.documentationUrl` | URL | Process documentation. |
-| `onboarding.formUrl` | URL | Online request form. |
-| `onboarding.contacts` | `[contact]` | Where service providers request onboarding. |
-| `onboarding.partner` | `{name, url}` | Third-party onboarding partner. |
-| `onboarding.usesPartner` | boolean | Onboarding runs through a third party. |
+| `onboarding.mode` | `"automatic"` \| `"on-request"` \| `"other"` | `automatic`: templates merged into the Templates repository are deployed without a request. `on-request`: service providers request onboarding through `onboarding.contacts`. `other`: see `modeDescription`. |
+| `onboarding.updateSchedule` | string | When merged templates are deployed. Only with mode `automatic`. |
+| `onboarding.contacts` | `[contact]` | Where service providers request onboarding. Required with mode `on-request` (at least one), not allowed with any other mode. |
+| `onboarding.modeDescription` | string | How onboarding works. Only with mode `other`. |
+| `onboarding.documentationUrl` | URL | Documentation of the onboarding process. |
 | `onboarding.cost` | boolean | Onboarding is charged. |
+| `onboarding.costDetails` | string | What is charged and how. Only when `cost` is `true`. |
+| `onboarding.agreementRequired` | boolean | A contract or agreement has to be signed, or terms and conditions accepted, before onboarding. |
+| `onboarding.agreementUrl` | URL | The agreement template, or the flow in which it is signed or accepted. Only when `agreementRequired` is `true`. |
+| `onboarding.usesPartner` | boolean | Onboarding runs through a third party. |
+| `onboarding.partners` | `[{name, url, contacts: [contact]}]` | Third parties onboarding runs through. Only when `usesPartner` is `true`. |
 | `onboarding.requirements.signedTemplatesOnly` | boolean | Only templates with signing. |
 | `onboarding.requirements.warnPhishingRejected` | boolean | Templates with `warnPhishing` are not accepted. |
 | `onboarding.requirements.signingKeyPublished` | boolean | The signing key has to be published. |
@@ -69,51 +77,90 @@ The full definition is [schema/provider.schema.json](schema/provider.schema.json
 | `features.recordTypes.apexCname` | boolean | `APEXCNAME`. |
 | `features.recordTypes.redir301` | boolean | `REDIR301`. |
 | `features.recordTypes.redir302` | boolean | `REDIR302`. |
+| `features.settings.urlControlPanel` | boolean | The settings response contains `urlControlPanel`. |
+| `features.settings.nameServers` | boolean | The settings response contains `nameServers`. |
+| `features.settings.windowSize` | boolean | The settings response contains `width` and `height`. |
+| `features.settings.nonStandard` | `[{key, description?}]` | Properties in the settings response that the specification does not define; empty list = none, absent = unknown. |
 | `features.nonStandard.cnameFlattening` | boolean | CNAME flattening: templates with a CNAME on the apex. |
 | `notes` | string | Anything else. |
+| `links` | `[link]` | Generic list of related links; `rel: "source"` marks the sources the entry was built from. |
+| `consent` | `true` | The submitter accepted the [submission terms](TERMS.md) and dedicated the entry to the public domain under CC0 1.0. Not required by the schema, but CI requires it in every added or changed entry; the form asks for it on every submission. See [Licence and submission terms](#licence-and-submission-terms). |
 
-`contact` is `{"type": "email" | "url" | "other", "value": string, "label"?: string}`.
+`contact` is `{"type": "email" | "url" | "form" | "other", "value": string, "label"?: string}`. With `email` the value is an e-mail address; with `url` (a web page) and `form` (an online request form) it is a URL.
+
+`link` is `{"url": URL, "title"?: string, "rel"?: string, "accessed"?: "YYYY-MM-DD"}`. `rel` is a lowercase token; `source` is the only value defined so far, and consumers ignore values they do not know. `accessed` is the date the link was last checked, a valid calendar date.
 
 Minimal entry:
 
 ```json
 {
-  "providerId": "ionos.com",
-  "name": "IONOS",
-  "url": "https://www.ionos.example",
-  "logo": "ionos.com.svg",
+  "providerId": "namesilo.com",
+  "name": "NameSilo",
+  "url": "https://www.namesilo.com",
+  "logo": { "format": "png", "data": "H4sIAAAAAAAAA…" },
   "onboarding": {
     "mode": "on-request",
-    "contacts": [{ "type": "email", "value": "domain_connect_admin@ionos.example" }]
-  }
+    "contacts": [{ "type": "email", "value": "domainconnect@namesilo.com" }]
+  },
+  "links": [
+    {
+      "url": "https://www.domainconnect.org/dns-providers/",
+      "title": "Domain Connect: DNS Providers",
+      "rel": "source",
+      "accessed": "2026-10-09"
+    }
+  ]
 }
 ```
 
-## Test entries
+(`data` is shortened here.)
 
-Each entry covers a case a registry consumer has to handle:
+Full entry: [providers/p/r/provider.example.json](providers/p/r/provider.example.json) is a dummy entry (`providerId` `provider.example`) that uses every field, with an embedded SVG logo. Its values are invented and its `.example` URLs do not resolve.
 
-| Entry | Case covered |
-| --- | --- |
-| [cloudflare.com](providers/c/l/cloudflare.com.json) | Every field, with `true`, `false` and unknown values; HTML in notes (must be shown as text); unknown keys to ignore. |
-| [ionos.com](providers/i/o/ionos.com.json) | Typical migrated entry: name, url, logo, on-request onboarding, one contact. |
-| [plesk.com](providers/p/l/plesk.com.json) | Stack entry shared by several deployments; automatic onboarding; no logo. |
+## Logo
 
-Cases with no entry (a `providerId` without a file, or a DNS provider with no `providerId`) are covered by the absence of a file.
+`logo` is either the URL of the image (`https://…`) or the image itself, embedded in the entry as `{"format": …, "data": …}`, so the registry holds nothing but entries:
+
+- `format` is `svg`, `png` or `jpg` and must match the image.
+- `data` is the image file, gzip-compressed and then base64-encoded (standard alphabet, with padding). It always starts with `H4sI`.
+- A PNG or JPEG is at least 90 × 90 pixels, at most 600 wide and 200 high, at most 6 times as wide as high and at most 2 times as high as wide. The [form](form/index.html) scales a larger upload down to fit in 600 × 200 and rejects one outside the other limits; these limits keep both sides at 90 pixels or more after scaling.
+- An SVG is UTF-8, well-formed XML with an `svg` root in the SVG namespace, without a DOCTYPE, entity declarations or processing instructions (other than the XML declaration), and without active content or external references: no `script` or `foreignObject`, no `on*` attributes, no `javascript:` in any attribute, no animation of `href` or `on*`, no `@import`, and every `href` and `url()` points into the document (`#id`) or is a `data:` PNG, JPEG, GIF or WebP. It has no size limits.
+
+To embed a file by hand: `gzip -9c logo.png | base64 -w0`; then check the entry with `.venv/bin/python scripts/check-logos.py <entry>`.
+
+## Example domain
+
+`exampleDomain` lets anyone reproduce the whole discovery flow: the TXT record `_domainconnect.{exampleDomain}` names the provider's API, and `GET https://{that API}/v2/{exampleDomain}/settings` returns this `providerId`. A domain whose `_domainconnect` record is missing or points elsewhere is not an example domain, even if the settings endpoint answers for it. The domain must also belong to the provider itself (its own site, a brand or company of the same group) or be listed publicly by the provider as an example. A customer's domain is never used.
+
+A settings URL in `links` may name a domain of the provider even when that domain is not `exampleDomain`. A settings URL queried with any other domain, such as a customer's, has that domain replaced by the placeholder `{domain}`, for example `https://domainconnect.api.godaddy.com/v2/{domain}/settings`.
 
 ## Contributing
 
-A pull request adds or changes an entry. An entry must:
+A pull request adds or changes an entry. The [form](form/index.html), published with GitHub Pages, builds an entry from the schema, validates it and copies its JSON, then opens the file on GitHub, where you paste the JSON and propose the change; it can also load an existing entry to change it. An entry must:
 
 - validate against [schema/provider.schema.json](schema/provider.schema.json),
 - sit at the path derived from its `providerId`,
-- name a logo file that exists in the same folder, if `logo` is set.
+- not add any file besides the entry (an embedded logo is part of the entry),
+- meet the [Logo](#logo) rules if it embeds a logo.
 
-The proposal has CI check these three points; this test repository has no CI yet.
+It should also list the sources of its facts in `links` with `rel: "source"` and an `accessed` date, and must not name a customer's domain (see [Example domain](#example-domain)). Submitting an entry means accepting the [submission terms](TERMS.md) (see [Licence and submission terms](#licence-and-submission-terms)).
 
-## Open questions
+Fill in the [pull request template](.github/pull_request_template.md): the entry, a summary, the sources, your relation to the DNS provider, the checklist and the consent. If an AI agent prepares the entry with you, it follows [AGENTS.md](AGENTS.md): it asks you about every field, shows you what it found with the source for you to confirm, never guesses, and asks for your consent to the terms before it opens the pull request.
 
-- Repository owner and name.
-- Logos: SVG preferred; licence or permission to republish.
-- Who maintains entries and who reviews pull requests.
-- Entries for single deployments of a multi-deployment stack (for example a hosting company on Plesk).
+CI ([.github/workflows/ci.yml](.github/workflows/ci.yml)) checks every pull request:
+
+- added and changed entries validate against the schema (all entries when the schema changes),
+- every file under `providers/` is a regular file (no symlink) and an entry at the path derived from its `providerId`; no other files ([scripts/check-files.sh](scripts/check-files.sh)),
+- an embedded logo meets the [Logo](#logo) rules: valid base64 and gzip, `format` matching the image, a PNG or JPEG that is complete and within the size limits, an SVG that is valid and safe ([scripts/check-logos.py](scripts/check-logos.py)),
+- every added or changed entry has `"consent": true` ([scripts/check-consent.py](scripts/check-consent.py)); entries that a pull request does not touch are not checked,
+- nothing outside `providers/` is added, changed or deleted.
+
+The checks always run from the base branch (`pull_request_target`), so a pull request cannot change them; its files are only read. Run the placement checks locally with `scripts/check-files.sh` (needs `bash`, `git` and `jq`) and the logo checks with `python3 scripts/check-logos.py providers/*/*/*.json` (standard library only).
+
+The form is served by GitHub Pages from the root of `main` (Settings, Pages, Deploy from a branch, `main`, `/ (root)`); `.nojekyll` makes Pages serve the `_` folders under `providers/`. The form reads the schema from the same site, so a schema change needs no change to the form. Preview it locally with `python3 -m http.server` in the repository root and open `http://localhost:8000/form/`.
+
+## Licence and submission terms
+
+The content of this repository is dedicated to the public domain under [CC0 1.0 Universal](LICENSE).
+
+Whoever submits an entry, through the form or as a pull request, accepts the [submission terms](TERMS.md): they may represent the DNS provider, the data matches the provider's actual setup, the entry holds no personal data and every contact belongs to the organisation, they keep the entry up to date, domainconnect.org may use any data in the repository (logos included) to present provider data, statistics and lists on its website, and no one related to domainconnect.org is liable for the content. The form shows this as the last field, *Consent to the submission terms* (`consent`), and does not open the pull request until it is ticked. A loaded entry never brings its `consent` along: every submitter gives it again. CI rejects an added or changed entry without `"consent": true`. Entries compiled from public sources before the terms existed have no `consent`; the first change to such an entry adds it.

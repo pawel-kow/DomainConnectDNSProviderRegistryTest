@@ -1,0 +1,37 @@
+{
+  "providerId": "webnames.ca",
+  "name": "Webnames.ca",
+  "url": "https://www.webnames.ca",
+  "exampleDomain": "webnamescorporate.com",
+  "documentation": [
+    {
+      "title": "Domain Connect",
+      "url": "https://www.webnames.ca/help/domains/content/resources/articles/domains/domain_management/dns/domain_connect.htm"
+    }
+  ],
+  "features": {
+    "syncFlow": true,
+    "asyncFlow": false,
+    "settings": {
+      "urlControlPanel": true,
+      "nameServers": false,
+      "windowSize": false,
+      "nonStandard": []
+    }
+  },
+  "notes": "Domain Connect requires Webnames.ca DNS Hosting. urlControlPanel points to the custom DNS page of the domain; for webnames.ca itself its value is null.",
+  "links": [
+    {
+      "url": "https://www.webnames.ca/help/domains/content/resources/articles/domains/domain_management/dns/domain_connect.htm",
+      "title": "Webnames.ca Help: Domain Connect",
+      "rel": "source",
+      "accessed": "2026-10-09"
+    },
+    {
+      "url": "https://www.webnames.ca/domainconnect/v2/webnamescorporate.com/settings",
+      "title": "Settings response for webnamescorporate.com (providerId, no urlAsyncUX)",
+      "rel": "source",
+      "accessed": "2026-10-09"
+    }
+  ]
+}

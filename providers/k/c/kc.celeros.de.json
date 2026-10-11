@@ -1,0 +1,24 @@
+{
+  "providerId": "kc.celeros.de",
+  "name": "Celeros Online KG",
+  "url": "https://www.celeros.de",
+  "features": {
+    "syncFlow": true,
+    "asyncFlow": false,
+    "settings": {
+      "urlControlPanel": true,
+      "nameServers": false,
+      "windowSize": false,
+      "nonStandard": []
+    }
+  },
+  "notes": "The settings response has no providerDisplayName. urlControlPanel contains the literal placeholder %domain%.",
+  "links": [
+    {
+      "url": "https://kc.celeros.de/domainconnect/v2/celeros.de/settings",
+      "title": "Settings response for celeros.de (providerId, no urlAsyncUX)",
+      "rel": "source",
+      "accessed": "2026-10-09"
+    }
+  ]
+}

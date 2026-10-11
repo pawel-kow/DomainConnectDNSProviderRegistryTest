@@ -1,0 +1,25 @@
+{
+  "providerId": "eurodns.com",
+  "name": "EuroDNS",
+  "url": "https://www.eurodns.com",
+  "exampleDomain": "eurodns.com",
+  "features": {
+    "syncFlow": true,
+    "asyncFlow": false,
+    "settings": {
+      "urlControlPanel": false,
+      "nameServers": false,
+      "windowSize": false,
+      "nonStandard": []
+    }
+  },
+  "notes": "The synchronous flow runs at my.eurodns.com/domain-connect.",
+  "links": [
+    {
+      "url": "https://pg.eurodns.com/panel-gateway/domain-connect/v2/eurodns.com/settings",
+      "title": "Settings response for eurodns.com (providerId, no urlAsyncUX)",
+      "rel": "source",
+      "accessed": "2026-10-09"
+    }
+  ]
+}

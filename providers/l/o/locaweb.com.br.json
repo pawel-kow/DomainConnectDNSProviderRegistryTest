@@ -1,0 +1,36 @@
+{
+  "providerId": "locaweb.com.br",
+  "name": "Locaweb",
+  "url": "https://www.locaweb.com.br",
+  "documentation": [
+    {
+      "title": "Como configurar as entradas DNS automaticamente com o Domain Connect?",
+      "url": "https://www.locaweb.com.br/ajuda/wiki/como-configurar-as-entradas-dns-automaticamente-com-o-domain-connect/"
+    }
+  ],
+  "features": {
+    "syncFlow": true,
+    "asyncFlow": false,
+    "settings": {
+      "urlControlPanel": true,
+      "nameServers": false,
+      "windowSize": false,
+      "nonStandard": []
+    }
+  },
+  "notes": "Domain Connect launched on 2025-09-15; DNS zones of domains registered at Locaweb carry the _domainconnect record automatically. Only the account that owns the domain can apply a template. The user cannot pick individual records: the template is applied as a whole, and the previous configuration cannot be restored afterwards.",
+  "links": [
+    {
+      "url": "https://www.locaweb.com.br/ajuda/wiki/como-configurar-as-entradas-dns-automaticamente-com-o-domain-connect/",
+      "title": "Locaweb Ajuda: Como configurar as entradas DNS automaticamente com o Domain Connect?",
+      "rel": "source",
+      "accessed": "2026-10-09"
+    },
+    {
+      "url": "https://domain-connect.locaweb.com.br/v2/locaweb.com.br/settings",
+      "title": "Settings response for locaweb.com.br (providerId, no urlAsyncUX)",
+      "rel": "source",
+      "accessed": "2026-10-09"
+    }
+  ]
+}

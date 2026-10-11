@@ -1,0 +1,25 @@
+{
+  "providerId": "aruba.it",
+  "name": "Aruba",
+  "url": "https://www.aruba.it",
+  "exampleDomain": "arubahosting.it",
+  "features": {
+    "syncFlow": true,
+    "asyncFlow": false,
+    "settings": {
+      "urlControlPanel": false,
+      "nameServers": false,
+      "windowSize": false,
+      "nonStandard": []
+    }
+  },
+  "notes": "The settings response has providerName \"Aruba S.p.A.\" and no providerDisplayName. The synchronous flow runs in the Aruba admin panel (admin.aruba.it).",
+  "links": [
+    {
+      "url": "https://dns-panel.aruba.it/api/v2/arubahosting.it/settings",
+      "title": "Settings response for an Aruba-hosted domain (providerId, no urlAsyncUX)",
+      "rel": "source",
+      "accessed": "2026-10-09"
+    }
+  ]
+}

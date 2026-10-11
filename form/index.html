@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Registry Entry Form – Domain Connect</title>
+<!-- GitHub repository and branch that pull requests go to. On <owner>.github.io/<repo>/ the
+     repository is taken from the address instead. -->
+<meta name="registry-repository" content="pawel-kow/DomainConnectDNSProviderRegistryTest">
+<meta name="registry-branch" content="main">
+<link rel="icon" href="assets/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16x16.png">
+<link rel="stylesheet" href="styles.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ajv/8.17.1/ajv2020.bundle.min.js" integrity="sha384-kz0rEmUPEGITP2jtssINcPlpx2oqv5B7mCxBMc6J15TQxYhoz2QdB0I974nvL4nI" crossorigin="anonymous"></script>
+<!-- Form library: react-jsonschema-form (https://rjsf-team.github.io/react-jsonschema-form/),
+     core theme. -->
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@19.3.0",
+    "react/": "https://esm.sh/react@19.3.0/",
+    "react-dom": "https://esm.sh/react-dom@19.3.0?external=react",
+    "react-dom/": "https://esm.sh/react-dom@19.3.0&external=react/",
+    "@rjsf/core": "https://esm.sh/@rjsf/core@6.10.1?external=react,react-dom&deps=@rjsf/utils@6.10.1",
+    "@rjsf/utils": "https://esm.sh/@rjsf/utils@6.10.1?external=react",
+    "@rjsf/validator-ajv8": "https://esm.sh/@rjsf/validator-ajv8@6.10.1?external=react,react-dom&deps=@rjsf/utils@6.10.1"
+  }
+}
+</script>
+<style>
+  /* The core theme writes Bootstrap 3 markup; these rules give it the page's design. */
+  .rjsf legend { font-size: 1.125rem; font-weight: 700; color: var(--secondary-navy); padding: 0; margin-top: var(--spacing-sm); }
+  .rjsf fieldset fieldset { border-left: 3px solid var(--light-blue-gray); padding-left: var(--spacing-sm); margin-top: var(--spacing-sm); }
+  .rjsf .form-group { margin-bottom: var(--spacing-sm); }
+  .rjsf .control-label { display: block; margin-bottom: 2px; }
+  .rjsf .required { color: var(--error-text); margin-left: 2px; }
+  .rjsf .field-description { color: var(--text-secondary); font-size: 0.8125rem; margin: 2px 0 6px; }
+  .rjsf .has-error:not(.rjsf-field-object, .rjsf-field-array) :is(input, select), .rjsf input:user-invalid { border-color: var(--accent-coral); }
+  .rjsf .error-detail { list-style: none; padding: 0; margin: 4px 0 0; color: var(--error-text); font-size: 0.8125rem; }
+  .rjsf .rjsf-array-item { gap: var(--spacing-xs); padding: var(--spacing-xs) 0; border-bottom: 1px solid var(--border-color); }
+  .rjsf .rjsf-array-item > .col-xs-9 { flex: 1 1 auto; min-width: 0; }
+  .rjsf .rjsf-array-item > div > .rjsf-field > fieldset { border-left: 0; padding-left: 0; margin-top: 0; }
+  .rjsf .rjsf-array-item > div > .rjsf-field > fieldset > legend { display: none; }
+  .rjsf .array-item-toolbox .btn-group { gap: 4px; }
+  .rjsf .rjsf-array-item-add { text-align: right; margin: var(--spacing-xs) 0 0; }
+  .rjsf .btn { font: inherit; font-size: 0.875rem; cursor: pointer; color: var(--primary-navy); background: var(--bg-white);
+    border: 1px solid var(--light-blue-gray); border-radius: var(--radius-sm); padding: 0.25rem 0.6rem; }
+  .rjsf .btn:hover:not(:disabled) { background: var(--bg-tint); border-color: var(--medium-teal); }
+  .rjsf .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .rjsf .btn-danger { color: var(--error-text); }
+  .rjsf .glyphicon { font-style: normal; }
+  .image-field figure { margin: 0 0 var(--spacing-xs); }
+  .image-field img { display: block; max-width: 100%; max-height: 210px; box-sizing: border-box; padding: 4px; background: var(--bg-white);
+    border: 1px solid var(--border-color); border-radius: var(--radius-sm); }
+  .image-field figcaption { color: var(--text-secondary); font-size: 0.8125rem; margin-top: 2px; }
+  .image-actions { display: flex; gap: 4px; }
+  .image-actions label { position: relative; overflow: hidden; }
+  .image-actions input { position: absolute; inset: 0; opacity: 0; pointer-events: none; }
+  .image-actions label:focus-within { outline: 2px solid var(--accent-cyan); outline-offset: 2px; }
+  .glyphicon-plus::before { content: "+ add"; }
+  .glyphicon-remove::before { content: "\2715"; }
+  .glyphicon-arrow-up::before { content: "\2191"; }
+  .glyphicon-arrow-down::before { content: "\2193"; }
+  .glyphicon-copy::before { content: "\29C9"; }
+</style>
+</head>
+<body>
+<header class="site">
+  <div class="container">
+    <div class="header-content">
+      <a href="https://www.domainconnect.org/"><img src="assets/DomainConnectBlackSmall.png" alt="Domain Connect" class="logo"></a>
+      <h1>DNS Provider Registry</h1>
+    </div>
+    <p class="subtitle">Add or change a registry entry</p>
+  </div>
+</header>
+
+<main class="container layout">
+  <div>
+    <section class="card">
+      <h2>About this form</h2>
+      <p>
+        This form builds an entry for the registry. Copy its JSON, then open the file on GitHub,
+        paste it and propose the change as a pull request. The fields come from the <a href="../schema/provider.schema.json">schema</a>. Before you
+        submit, read the rules in the <a data-repo="/blob/{branch}/README.md" href="../README.md">README</a>:
+        list a source for every fact in <code>links</code> (<code>rel</code> <code>source</code>
+        with an <code>accessed</code> date), and never name a customer's domain. Leave out what
+        you do not know. At the end of the form you consent to the
+        <a data-repo="/blob/{branch}/TERMS.md" href="../TERMS.md">submission terms</a>; entries are
+        published under <a data-repo="/blob/{branch}/LICENSE" href="../LICENSE">CC0 1.0</a>.
+      </p>
+      <form id="load-form" class="load controls">
+        <input id="load-id" placeholder="providerId of an existing entry" aria-label="providerId of an existing entry">
+        <button type="submit" class="btn">Load entry</button>
+      </form>
+      <p id="load-status" class="muted" aria-live="polite"></p>
+    </section>
+
+    <section class="card">
+      <h2>Entry</h2>
+      <div id="form"><p class="muted">Loading the schema…</p></div>
+    </section>
+  </div>
+
+  <aside class="panel">
+    <section class="card">
+      <h2>Pull request</h2>
+      <dl>
+        <dt>File</dt>
+        <dd><code id="path">–</code> <span id="exists" class="status"></span></dd>
+      </dl>
+      <p id="valid" hidden>The entry is valid.</p>
+      <ul id="errors" aria-live="polite"></ul>
+      <p class="muted">Submitting requires your consent to the
+        <a data-repo="/blob/{branch}/TERMS.md" href="../TERMS.md">submission terms</a> at the end of
+        the form. The entry is published under <a data-repo="/blob/{branch}/LICENSE" href="../LICENSE">CC0 1.0</a>.</p>
+      <div class="actions">
+        <button id="copy" class="btn primary" disabled>Copy JSON</button>
+        <button id="github" class="btn" disabled>Edit on GitHub</button>
+      </div>
+      <p id="message" class="message" aria-live="polite"></p>
+      <details id="json-details">
+        <summary>JSON</summary>
+        <pre id="json"></pre>
+      </details>
+    </section>
+  </aside>
+</main>
+
+<footer class="site">
+  <div class="container">
+    <p>&copy; Domain Connect. Visit <a href="https://www.domainconnect.org/">domainconnect.org</a></p>
+    <p><a data-repo="" href="https://github.com/">View on GitHub</a></p>
+  </div>
+</footer>
+
+<script type="module">
+import { createElement as h, useEffect, useState } from "react";
+import { createRoot } from "react-dom/client";
+import Form, { getDefaultRegistry } from "@rjsf/core";
+import { customizeValidator } from "@rjsf/validator-ajv8";
+import { toFieldPathId } from "@rjsf/utils";
+import { start, fail, relevantErrors, embedImage, embeddedImageURL } from "./registry.js";
+
+// A tri-state flag (type boolean or null) is a choice of true and false; the empty choice,
+// "unknown", leaves the key out. RJSF leaves label and description of a boolean to its widget.
+const isFlag = s => Array.isArray(s.type) && s.type.includes("boolean") && s.type.includes("null");
+const { CheckboxWidget, SelectWidget } = getDefaultRegistry().widgets;
+const widgets = {
+  CheckboxWidget: p => isFlag(p.schema)
+    ? h("div", null,
+        h("label", { className: "control-label", htmlFor: p.id }, p.label),
+        p.schema.description && h("p", { className: "field-description" }, p.schema.description),
+        h(SelectWidget, {
+          ...p,
+          value: p.value ?? undefined,
+          placeholder: "unknown",
+          options: { ...p.options, enumOptions: [{ label: "true", value: true }, { label: "false", value: false }] },
+        }))
+    : h(CheckboxWidget, p),
+};
+
+// An object with a gzip-compressed, base64-encoded string (contentEncoding base64,
+// contentMediaType application/gzip) and a property with an enum is an embedded image. It is
+// shown as a file upload with a preview; the upload sets both properties, the enum value from
+// the file's content. The encoded string is never shown.
+const isPacked = s => s?.type === "string" && s.contentEncoding === "base64" && s.contentMediaType === "application/gzip";
+const imageKeys = s => {
+  const props = Object.entries(s?.properties || {});
+  const data = props.find(([, p]) => isPacked(p))?.[0];
+  const format = props.find(([, p]) => Array.isArray(p?.enum))?.[0];
+  return data && format ? { data, format } : null;
+};
+const childErrors = es => Object.entries(es || {})
+  .flatMap(([k, v]) => k === "__errors" ? [] : [...(v.__errors || []), ...childErrors(v)]);
+function ImageField(p) {
+  const keys = imageKeys(p.schema), value = p.formData || {};
+  const format = value[keys.format], data = value[keys.data];
+  const [preview, setPreview] = useState(null);
+  const [error, setError] = useState("");
+  useEffect(() => {
+    let url, live = true;
+    setPreview(null);
+    if (format && data) {
+      embeddedImageURL(format, data).then(
+        r => { url = r.url; if (live) setPreview(r); else URL.revokeObjectURL(url); },
+        () => live && setError("The stored image cannot be read."));
+    }
+    return () => { live = false; if (url) URL.revokeObjectURL(url); };
+  }, [format, data]);
+  const set = v => p.onChange({ ...value, [keys.format]: v?.format, [keys.data]: v?.data }, p.fieldPathId.path);
+  async function upload(e) {
+    const file = e.target.files[0];
+    e.target.value = "";
+    if (!file) return;
+    try {
+      set(await embedImage(file, p.schema.properties[keys.format].enum));
+      setError("");
+    } catch (x) { setError(x.message); }
+  }
+  const t = k => p.schema.properties[k].title ?? k;
+  const required = k => (p.schema.required || []).includes(k);
+  const messages = [error, ...childErrors(p.errorSchema)].filter(Boolean);
+  return h("div", { className: "image-field" },
+    p.schema.description && h("p", { className: "field-description" }, p.schema.description),
+    h("label", { className: "control-label", htmlFor: p.fieldPathId.$id }, t(keys.data), required(keys.data) && h("span", { className: "required" }, "*")),
+    preview && h("figure", null,
+      h("img", { src: preview.url, alt: "", onLoad: e => setPreview({ ...preview, w: e.target.naturalWidth, h: e.target.naturalHeight }) }),
+      h("figcaption", null, [
+        `${t(keys.format)}: ${format}`,
+        format !== "svg" && preview.w ? `${preview.w} × ${preview.h} px` : "",
+        `${(preview.size / 1024).toFixed(1)} kB`,
+      ].filter(Boolean).join(" · "))),
+    h("div", { className: "image-actions" },
+      h("label", { className: "btn" },
+        h("input", { type: "file", accept: "image/*", id: p.fieldPathId.$id, onChange: upload, disabled: p.disabled || p.readonly }),
+        data ? "Replace image…" : "Choose image…"),
+      data && h("button", { type: "button", className: "btn btn-danger", onClick: () => { setError(""); set(null); } }, "Remove")),
+    messages.length > 0 && h("ul", { className: "error-detail" },
+      messages.map((m, i) => h("li", { key: i, className: "text-danger" }, m))));
+}
+const { ObjectField } = getDefaultRegistry().fields;
+const fields = { ObjectField: p => imageKeys(p.schema) ? h(ImageField, p) : h(ObjectField, p) };
+
+// format only picks the input type (url, email, date); the schema's patterns validate, as in
+// registry.js. Ajv's uri format would reject the {domain} placeholder in settings links.
+const validator = customizeValidator({ AjvClass: ajv2020.default, ajvOptionsOverrides: { validateFormats: false } });
+
+// Field ids are built by RJSF from idPrefix, the path and idSeparator (root_links_0_url); an
+// object or array is a fieldset with its id.
+const ids = { idPrefix: "root", idSeparator: "_" };
+const field = el => keys => el.querySelector(`[id="${CSS.escape(toFieldPathId("", ids, keys).$id)}"]`);
+
+function mount(el, schema, onChange) {
+  el.classList.add("controls");
+  return new Promise(resolve => {
+    function Entry() {
+      const [data, setData] = useState({});
+      useEffect(() => { resolve({ setValue: setData, field: field(el) }); }, []);
+      useEffect(() => { onChange(data); }, [data]);
+      return h(Form, {
+        schema,
+        ...ids,
+        validator,
+        widgets,
+        fields,
+        formData: data,
+        liveValidate: true,
+        // RJSF makes a required boolean false; an unticked acknowledgement (const true) is
+        // listed by registry.js as a missing property, not shown as "must be equal to constant".
+        transformErrors: errors => relevantErrors(errors, e => e.name, e => e.property)
+          .filter(e => !(e.name === "const" && e.params?.allowedValue === true)),
+        showErrorList: false,
+        experimental_defaultFormStateBehavior: {
+          emptyObjectFields: "skipEmptyDefaults",
+          arrayMinItems: { populate: "never" },
+          constAsDefaults: "never",
+        },
+        uiSchema: { "ui:submitButtonOptions": { norender: true } },
+        onChange: e => setData(e.formData),
+      });
+    }
+    createRoot(el).render(h(Entry));
+  });
+}
+
+start(mount).catch(fail);
+</script>
+</body>
+</html>
