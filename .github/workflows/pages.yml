@@ -1,0 +1,69 @@
+name: Pages
+
+# Publishes pages/ as the site root, with the schema and the entries, on GitHub Pages after CI passed on a push to
+# main, or by hand. A workflow_run workflow always runs from the default branch.
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    # A pull_request_target run from a fork branch named main also has head_branch main.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push' &&
+       github.event.workflow_run.head_branch == 'main')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Check out the commit CI checked
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          persist-credentials: false
+
+      - name: Collect the published files
+        run: |
+          mkdir _site
+          cp -r pages/. schema providers _site/
+
+      - uses: actions/configure-pages@v6
+
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: _site/
+          # .nojekyll
+          include-hidden-files: true
+
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v5
+
+      - name: Check the published site
+        env:
+          SITE: ${{ steps.deployment.outputs.page_url }}
+        run: |
+          status=0
+          for path in "" form/ schema/provider.schema.json; do
+            code=$(curl -sf -o /dev/null -w '%{http_code}' --retry 5 --retry-delay 10 --retry-all-errors "$SITE$path" || true)
+            echo "$code $SITE$path"
+            [ "$code" = 200 ] || status=1
+          done
+          exit "$status"

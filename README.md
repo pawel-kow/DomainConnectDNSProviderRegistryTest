@@ -4,12 +4,18 @@ The Domain Connect DNS provider registry: a set of JSON files, one per DNS provi
 
 The registry format is a proposal (proposed repository name: `Domain-Connect/DnsProviders`). This first version has one entry for every DNS provider listed on [domainconnect.org/dns-providers](https://www.domainconnect.org/dns-providers/), with the logo published there. Each entry was completed from the provider's public documentation and its live Domain Connect settings response, and lists every source it used in `links`.
 
+## Submit an entry
+
+Use the [entry form](https://pawel-kow.github.io/DomainConnectDNSProviderRegistryTest/form/): it builds an entry from the schema, validates it and opens the file on GitHub for a pull request. See [Contributing](#contributing).
+
 ## Layout
 
 ```
 providers/<a>/<b>/<providerId>.json        one entry per providerId
 schema/provider.schema.json                JSON Schema (draft 2020-12) of an entry
-form/index.html                            web form that builds an entry for a pull request
+pages/                                     the site root on GitHub Pages
+pages/form/index.html                      web form that builds an entry for a pull request
+pages/index.html                           redirect to form/
 TERMS.md                                   submission terms every submitter accepts
 LICENSE                                    CC0 1.0 Universal, the licence of the repository
 AGENTS.md                                  instructions for AI agents that prepare an entry with a user
@@ -123,7 +129,7 @@ Full entry: [providers/p/r/provider.example.json](providers/p/r/provider.example
 
 - `format` is `svg`, `png` or `jpg` and must match the image.
 - `data` is the image file, gzip-compressed and then base64-encoded (standard alphabet, with padding). It always starts with `H4sI`.
-- A PNG or JPEG is at least 90 × 90 pixels, at most 600 wide and 200 high, at most 6 times as wide as high and at most 2 times as high as wide. The [form](form/index.html) scales a larger upload down to fit in 600 × 200 and rejects one outside the other limits; these limits keep both sides at 90 pixels or more after scaling.
+- A PNG or JPEG is at least 90 × 90 pixels, at most 600 wide and 200 high, at most 6 times as wide as high and at most 2 times as high as wide. The [form](https://pawel-kow.github.io/DomainConnectDNSProviderRegistryTest/form/) scales a larger upload down to fit in 600 × 200 and rejects one outside the other limits; these limits keep both sides at 90 pixels or more after scaling.
 - An SVG is UTF-8, well-formed XML with an `svg` root in the SVG namespace, without a DOCTYPE, entity declarations or processing instructions (other than the XML declaration), and without active content or external references: no `script` or `foreignObject`, no `on*` attributes, no `javascript:` in any attribute, no animation of `href` or `on*`, no `@import`, and every `href` and `url()` points into the document (`#id`) or is a `data:` PNG, JPEG, GIF or WebP. It has no size limits.
 
 To embed a file by hand: `gzip -9c logo.png | base64 -w0`; then check the entry with `.venv/bin/python scripts/check-logos.py <entry>`.
@@ -136,7 +142,7 @@ A settings URL in `links` may name a domain of the provider even when that domai
 
 ## Contributing
 
-A pull request adds or changes an entry. The [form](form/index.html), published with GitHub Pages, builds an entry from the schema, validates it and copies its JSON, then opens the file on GitHub, where you paste the JSON and propose the change; it can also load an existing entry to change it. An entry must:
+A pull request adds or changes an entry. The [form](https://pawel-kow.github.io/DomainConnectDNSProviderRegistryTest/form/) builds an entry from the schema, validates it and copies its JSON, then opens the file on GitHub, where you paste the JSON and propose the change; it can also load an existing entry to change it. An entry must:
 
 - validate against [schema/provider.schema.json](schema/provider.schema.json),
 - sit at the path derived from its `providerId`,
@@ -159,7 +165,12 @@ A push to `main` checks every entry against the schema, the placement and the lo
 
 The checks always run from the base branch (`pull_request_target`), so a pull request cannot change them; its files are only read. Run the placement checks locally with `scripts/check-files.sh` (needs `bash`, `git` and `jq`) and the logo checks with `python3 scripts/check-logos.py providers/*/*/*.json` (standard library only).
 
-The form is served by GitHub Pages from the root of `main` (Settings, Pages, Deploy from a branch, `main`, `/ (root)`); `.nojekyll` makes Pages serve the `_` folders under `providers/`. The form reads the schema from the same site, so a schema change needs no change to the form. Preview it locally with `python3 -m http.server` in the repository root and open `http://localhost:8000/form/`.
+GitHub Pages publishes `pages/` as the site root, with `schema/` and `providers/` next to `form/` (Settings, Pages, Source *GitHub Actions*). [.github/workflows/pages.yml](.github/workflows/pages.yml) deploys them after CI passes on a push to `main`, or when run by hand, and checks that the site, the form and the schema answer. The root redirects to the form. The form reads the schema from the same site, so a schema change needs no change to the form. Preview it locally with the same layout, in the repository root:
+
+```bash
+site=$(mktemp -d) && ln -s "$PWD"/pages/* "$PWD"/schema "$PWD"/providers "$site"
+python3 -m http.server --directory "$site"    # open http://localhost:8000/form/
+```
 
 ## Licence and submission terms
 

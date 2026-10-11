@@ -17,7 +17,7 @@ fetched; the schema checks the shape), `data` must be
     foreignObject, no on* attributes, no javascript: in an attribute, no animation of href or
     on* attributes, no @import, and every href and url() points into the document (#id) or is
     a data: PNG, JPEG, GIF or WebP.
-The form applies the same rules on upload (form/registry.js: embedImage, svgProblem).
+The form applies the same rules on upload (pages/form/registry.js: embedImage, svgProblem).
 
 Entries that are not valid JSON are skipped; the placement check reports them. The files are
 only read as data, never executed. Uses the standard library only.

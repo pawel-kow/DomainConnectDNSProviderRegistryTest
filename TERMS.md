@@ -1,6 +1,6 @@
 # Submission terms
 
-These terms apply to every entry submitted to this repository, whether through the [entry form](form/index.html) or as a pull request. "You" is the person who submits the entry. "Domain Connect" means domainconnect.org and every person and organisation related to it, including its operators, members, maintainers and reviewers of this repository, and contributors.
+These terms apply to every entry submitted to this repository, whether through the [entry form](https://pawel-kow.github.io/DomainConnectDNSProviderRegistryTest/form/) or as a pull request. "You" is the person who submits the entry. "Domain Connect" means domainconnect.org and every person and organisation related to it, including its operators, members, maintainers and reviewers of this repository, and contributors.
 
 By ticking *Consent to the submission terms* in the form (`consent` in the entry), or by opening a pull request that adds or changes an entry, you confirm and agree to the following.
 
