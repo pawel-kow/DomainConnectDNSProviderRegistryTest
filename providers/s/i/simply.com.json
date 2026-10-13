@@ -1,0 +1,48 @@
+{
+  "providerId": "simply.com",
+  "name": "Simply.com",
+  "url": "https://www.simply.com",
+  "exampleDomain": "simply-example.com",
+  "logo": "https://static.simply.com/assets/brand/simply-logo-color.svg",
+  "onboarding": {
+    "mode": "automatic",
+    "updateSchedule": "Immediately: templates are fetched live from the Templates repository on every request",
+    "requirements": {
+      "signedTemplatesOnly": false
+    }
+  },
+  "features": {
+    "syncFlow": true,
+    "syncRedirectUri": true,
+    "asyncFlow": false,
+    "templateStateTracking": true,
+    "templates": {
+      "txtConflictMatching": true,
+      "variablesInNumberFields": true,
+      "multiInstance": true,
+      "sharedNames": true,
+      "essential": true
+    },
+    "recordTypes": {
+      "spfm": true,
+      "apexCname": true,
+      "redir301": false,
+      "redir302": false
+    },
+    "settings": {
+      "urlControlPanel": true,
+      "nameServers": false,
+      "windowSize": true,
+      "nonStandard": []
+    }
+  },
+  "links": [
+    {
+      "url": "https://domainconnect.simply.com/v2/simply-example.com/settings",
+      "title": "Settings response for the example domain",
+      "rel": "source",
+      "accessed": "2026-10-13"
+    }
+  ],
+  "consent": true
+}
